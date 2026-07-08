@@ -25,20 +25,15 @@ export default function Book() {
   const [sizeId, setSizeId] = useState("");
   const [tierId, setTierId] = useState("");
   const [removalId, setRemovalId] = useState("");
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [instagram, setInstagram] = useState("");
-
-  const [status, setStatus] = useState("idle"); // Booking status
+  const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [waitlistStatus, setWaitlistStatus] = useState("idle"); // Waitlist status
+  const [waitlistStatus, setWaitlistStatus] = useState("idle");
 
   useEffect(() => {
-    fetch("/api/slots")
-      .then((r) => r.json())
-      .then((data) => setSlots(data.slots || []))
-      .catch(() => setSlots([]));
+    fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
     setHasMounted(true);
   }, []);
 
@@ -50,25 +45,23 @@ export default function Book() {
 
   const price = sizeId && tierId ? priceFor(sizeId, tierId, removalId || null) : null;
   const dueAtAppointment = price != null ? Math.max(price - DEPOSIT_AMOUNT, 0) : null;
-  const canSubmitBooking = slotId && sizeId && tierId && name && phone;
+  const canSubmit = slotId && sizeId && tierId && name && phone;
 
-  async function handleBookingSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!canSubmitBooking) return;
+    if (!canSubmit) return;
     setStatus("submitting");
-    setErrorMsg("");
     try {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+      if (!res.ok) throw new Error("Booking failed");
       setStatus("done");
-    } catch (err) {
+    } catch {
       setStatus("error");
-      setErrorMsg(err.message);
+      setErrorMsg("Something went wrong.");
     }
   }
 
@@ -89,47 +82,41 @@ export default function Book() {
     }
   }
 
-  if (!hasMounted) return <><Nav /><main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center"><p className="text-base text-ink/50">Loading…</p></main><Footer /></>;
+  if (!hasMounted) return <><Nav /><main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center"><p className="text-base text-ink/50">Loading booking portal…</p></main><Footer /></>;
 
   if (status === "done") {
-    return (
-      <><Nav /><main className="mx-auto max-w-xl px-6 py-28 text-center">
-        <h1 className="font-display text-3xl text-inkDeep mb-4">Request sent ✿</h1>
-        <p className="text-ink/70 mb-8 text-lg">Send your ${DEPOSIT_AMOUNT} deposit via Zelle to <span className="text-inkDeep font-medium">626-295-8572</span>.</p>
-      </main><Footer /></>
-    );
+    return (<><Nav /><main className="mx-auto max-w-xl px-6 py-28 text-center"><h1 className="font-display text-3xl text-inkDeep mb-4">You're booked ✿</h1><p>Check your messages!</p></main><Footer /></>);
   }
 
   return (
     <>
       <Nav />
       <main className="mx-auto max-w-2xl px-6 pt-16 pb-24">
-        <form onSubmit={handleBookingSubmit} className="space-y-10">
-          {/* ... [Keep your existing form sections for 1. Removal, 2. Open Slots, 3. Length, 4. Tier here] ... */}
-
+        <form onSubmit={handleSubmit} className="space-y-10">
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">5. Your info</h2>
-            <div className="grid gap-3">
-              <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
-              <input required type="tel" placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
-              <input required placeholder="Instagram username" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Removal</h2>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 ring-1 ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None</button>
+              {REMOVALS.map((r) => <button type="button" key={r.id} onClick={() => setRemovalId(r.id)} className={`rounded-xl px-4 py-3 ring-1 ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>{r.label}</button>)}
             </div>
           </div>
-
-          {/* Waitlist Section (Inside the "Open Slots" area or at the bottom) */}
-          {eligibleSlots?.length === 0 && (
-            <div className="rounded-2xl bg-stoneDeep/60 p-6">
-              {waitlistStatus === "done" ? <p>Successfully added to the waitlist! ✿</p> : (
-                <div className="grid gap-3">
-                  <button type="button" onClick={handleWaitlistSubmit} disabled={!name || !phone || !instagram || waitlistStatus === "submitting"}>
-                    {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          <button type="submit" disabled={!canSubmitBooking || status === "submitting"}>Request this slot</button>
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Slots</h2>
+            {eligibleSlots?.length === 0 ? (
+              <div className="p-6 rounded-2xl bg-stoneDeep/60">
+                <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full mb-2 p-2 rounded-xl" />
+                <input required placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full mb-2 p-2 rounded-xl" />
+                <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="w-full mb-4 p-2 rounded-xl" />
+                <button type="button" onClick={handleWaitlistSubmit} className="bg-inkDeep text-mist px-6 py-2 rounded-full">{waitlistStatus === "submitting" ? "Joining..." : "Join Waitlist"}</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {eligibleSlots?.map(s => <button type="button" key={s.id} onClick={() => setSlotId(s.id)} className={`p-3 rounded-xl ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}>{formatDate(s.date)}</button>)}
+              </div>
+            )}
+          </div>
+          {/* Add Sections 3 (Size), 4 (Tier), 5 (Info) here as before */}
+          <button type="submit" className="w-full bg-inkDeep text-mist py-3 rounded-full">Request Slot</button>
         </form>
       </main>
       <Footer />
