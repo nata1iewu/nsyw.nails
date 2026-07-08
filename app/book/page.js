@@ -149,9 +149,16 @@ export default function Book() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{TIERS.map((tier) => <SwatchTier key={tier.id} tier={tier} interactive selected={tierId === tier.id} onClick={() => setTierId(tier.id)} />)}</div>
           </div>
 
-          <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
-            {status === "submitting" ? "Sending..." : "Request this slot"}
-          </button>
+          {status === "done" ? (
+            <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
+              <h3 className="font-display text-lg text-inkDeep mb-2">Request sent! ✿</h3>
+              <p className="text-sm text-ink/70">Thank you! I've received your booking request and will confirm with you shortly via text or Instagram. Talk soon!</p>
+            </div>
+          ) : (
+            <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
+              {status === "submitting" ? "Sending..." : "Request this slot"}
+            </button>
+          )}
         </form>
       </main>
       <Footer />

@@ -5,6 +5,7 @@ export default function Admin() {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
   const [waitlist, setWaitlist] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("120");
@@ -17,12 +18,30 @@ export default function Admin() {
         const data = await res.json();
         setWaitlist(data.waitlist || []);
       }
+      const bookingsRes = await fetch("/api/admin/bookings");
+      if (bookingsRes.ok) {
+        const data = await bookingsRes.json();
+        setBookings(data.bookings || []);
+      }
     } catch (e) { console.error("Error loading data", e); }
   }
 
   useEffect(() => {
     if (authed) fetchData();
   }, [authed]);
+
+  async function handleBookingAction(id, action) {
+    const res = await fetch("/api/admin/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action }),
+    });
+    if (res.ok) {
+      fetchData();
+    } else {
+      alert("Failed to update booking.");
+    }
+  }
 
   async function handleAddSlot() {
     if (!date || !time) return alert("Fill in date and time!");
@@ -143,6 +162,29 @@ export default function Admin() {
             }
           }
         }} className="block text-red-500 text-sm underline mt-3">Clear All Slots</button>
+      </div>
+
+      {/* Bookings Section */}
+      <div className="mb-10">
+        <h2 className="text-xl mb-4">Bookings ({bookings.length})</h2>
+        {bookings.length === 0 ? (
+          <p className="text-sm text-gray-500">No bookings yet.</p>
+        ) : (
+          bookings.map((b) => (
+            <div key={b.id} className="py-3 border-b">
+              <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
+              <div className="text-sm text-gray-600 mb-2">
+                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} · {b.size} · {b.tier} {b.removal ? `· ${b.removal}` : ""} · ${b.price} · <span className="uppercase">{b.status}</span>
+              </div>
+              {b.status === "pending" && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleBookingAction(b.id, "approve")} className="bg-green-600 text-white text-sm px-3 py-1 rounded">Approve</button>
+                  <button onClick={() => handleBookingAction(b.id, "deny")} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Deny</button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Waitlist Section */}
