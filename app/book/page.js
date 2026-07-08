@@ -61,23 +61,24 @@ export default function Book() {
     }
   }
 
-  async function handleWaitlistSubmit() {
-    if (!name || !phone || !instagram) {
-      alert("Please fill in all fields!");
-      return;
-    }
-    setWaitlistStatus("submitting");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setStatus("submitting");
     try {
-      const res = await fetch("/api/admin/waitlist", {
+      const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, instagram }),
+        body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
       });
-      if (!res.ok) throw new Error("Failed to join");
-      setWaitlistStatus("done");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Booking failed");
+      }
+      setStatus("done");
     } catch (err) {
-      alert("Error: " + err.message);
-      setWaitlistStatus("idle");
+      setStatus("error");
+      alert(err.message);
     }
   }
 
@@ -112,6 +113,9 @@ export default function Book() {
                   </div>
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
+                    <p className="font-display text-base text-inkDeep mb-1">
+                      Currently fully booked! Follow @nsyw.nails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
+                    </p>
                     <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
                     <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
                     <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />

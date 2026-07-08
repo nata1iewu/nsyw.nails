@@ -28,7 +28,7 @@ export default function Admin() {
     const res = await fetch("/api/admin/add-slot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: Date.now().toString(), date, time, status: "available" }),
+      body: JSON.stringify({ id: Date.now().toString(), date, time, status: "open" }),
     });
     if (res.ok) {
       alert("Slot added successfully!");
@@ -51,7 +51,7 @@ export default function Admin() {
       id: Date.now().toString() + Math.random(),
       date: dateStr,
       time: time,
-      status: "available"
+      status: "open"
     }));
 
     const res = await fetch("/api/admin/add-slot", {
