@@ -90,7 +90,7 @@ export default function Home() {
         </section>
 
         {/* Policy strip */}
-        <section className="mx-auto max-w-5xl px-6 py-2 grid gap-10 sm:grid-cols-4">
+        <section className="mx-auto max-w-5xl px-6 py-6 grid gap-6 sm:grid-cols-4">
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Appointment only</p>
             <p className="text-base text-ink/70">All bookings go through the site!</p>
