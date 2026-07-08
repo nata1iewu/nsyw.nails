@@ -68,7 +68,11 @@ export default function Book() {
 
   async function handleWaitlistSubmit(e) {
     e.preventDefault();
-    if (!name || !phone || !instagram) return;
+    if (!name || !phone || !instagram) {
+      alert("Please fill in all fields!");
+      return;
+    }
+
     setWaitlistStatus("submitting");
     try {
       const res = await fetch("/api/waitlist", {
@@ -76,10 +80,19 @@ export default function Book() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, instagram }),
       });
-      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to join");
+      }
+
+      // If we got a 200 OK, this will trigger the UI change
       setWaitlistStatus("done");
-    } catch {
-      setWaitlistStatus("error");
+    } catch (err) {
+      console.error("Waitlist error:", err);
+      alert("Error: " + err.message);
+      setWaitlistStatus("idle"); // Reset button so you can try again
     }
   }
 
