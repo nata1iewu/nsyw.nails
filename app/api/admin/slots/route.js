@@ -1,4 +1,5 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getSlots, addSlot, removeSlot } from "@/lib/kv";

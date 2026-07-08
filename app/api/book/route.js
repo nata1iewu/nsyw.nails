@@ -1,4 +1,5 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { getSlots, setSlotStatus, addBooking } from "@/lib/kv";
 import { priceFor, SIZES, TIERS, REMOVALS } from "@/lib/pricing";
