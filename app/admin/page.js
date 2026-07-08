@@ -42,7 +42,24 @@ export default function Admin() {
       <main className="mx-auto max-w-sm px-6 py-28">
         <h1 className="text-2xl mb-6">Admin Login</h1>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-xl" />
-        <button onClick={() => password === "YOUR_PASSWORD" ? setAuthed(true) : alert("Wrong")} className="w-full mt-3 bg-black text-white p-3 rounded-full">Log in</button>
+        <button
+          onClick={async () => {
+            const res = await fetch("/api/admin/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password }),
+            });
+
+            if (res.ok) {
+              setAuthed(true);
+            } else {
+              alert("Wrong password.");
+            }
+          }}
+          className="w-full mt-3 bg-black text-white p-3 rounded-full"
+        >
+          Log in
+        </button>
       </main>
     );
   }
