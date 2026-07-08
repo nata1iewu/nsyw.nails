@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  border-color: theme("colors.line");
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+::selection {
+  background: theme("colors.clay");
+  color: theme("colors.mist");
+}
+
+:focus-visible {
+  outline: 2px solid theme("colors.umber");
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+}
