@@ -37,6 +37,35 @@ export default function Admin() {
       alert("Failed to add slot.");
     }
   }
+  async function handleBulkAdd() {
+    // Expects input like: 07/09, 10:00 AM, 12:00 PM, 2:00 PM
+    const parts = date.split(',').map(p => p.trim());
+    if (parts.length < 2) return alert("Format: Date, Time1, Time2...");
+
+    const dateStr = parts[0];
+    const timeSlots = parts.slice(1);
+
+    const newSlots = timeSlots.map(time => ({
+      id: Date.now().toString() + Math.random(),
+      date: dateStr,
+      time: time,
+      status: "available"
+    }));
+
+    const res = await fetch("/api/admin/add-slot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newSlots),
+    });
+
+    if (res.ok) {
+      alert("Slots added!");
+      setDate(""); // Clear the input
+      fetchData(); // Refresh the list
+    } else {
+      alert("Failed to add slots.");
+    }
+  }
 
   if (!authed) {
     return (
@@ -69,7 +98,11 @@ export default function Admin() {
       </div>
       <div>
         <h2 className="text-xl mb-4">Waitlist ({waitlist.length})</h2>
-        {waitlist.map((w, i) => <div key={i} className="py-2 border-b">{w.name} - {w.phone}</div>)}
+        {waitlist.map((w, i) => (
+          <div key={i} className="py-2 border-b">
+            {w.name} - {w.phone} {w.instagram ? `- ${w.instagram}` : ""}
+          </div>
+        ))}
       </div>
     </main>
   );

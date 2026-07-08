@@ -21,3 +21,12 @@ export async function POST(req) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function DELETE() {
+    try {
+        await clearWaitlist();
+        return NextResponse.json({ message: "Waitlist cleared" });
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
