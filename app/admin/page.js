@@ -1,6 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getWaitlist } from "@/lib/kv";
+
+export default async function AdminPage() {
+  const waitlist = await getWaitlist();
+
+  return (
+    <div>
+      <h1>Admin Dashboard</h1>
+      <h2>Waitlist</h2>
+      <table>
+        {waitlist.map(entry => (
+          <tr key={entry.id}>
+            <td>{entry.name}</td>
+            <td>{entry.phone}</td>
+            <td>{entry.instagram}</td>
+          </tr>
+        ))}
+      </table>
+    </div>
+  );
+}
 
 function Section({ title, children }) {
   return (

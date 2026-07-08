@@ -1,26 +1,22 @@
+// app/api/waitlist/route.js
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-import { NextResponse } from "next/server";
+
 import { addToWaitlist } from "@/lib/kv";
 
-export async function POST(request) {
+export async function POST(req) {
     try {
-        const body = await request.json();
-        const { name, phone, instagram } = body;
+        const { name, phone, instagram } = await req.json();
 
-        if (!name || !phone) {
-            return NextResponse.json(
-                { error: "Name and phone number are required." },
-                { status: 400 }
-            );
+        // Enforce the requirement for all three fields
+        if (!name || !phone || !instagram) {
+            return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
         }
 
-        const entry = await addToWaitlist({ name, phone, instagram });
-        return NextResponse.json({ success: true, entry });
+        await addToWaitlist({ name, phone, instagram });
+        return new Response(JSON.stringify({ message: "Success" }), { status: 200 });
+
     } catch (error) {
-        return NextResponse.json(
-            { error: error.message || "Internal Server Error" },
-            { status: 500 }
-        );
+        return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
     }
 }
