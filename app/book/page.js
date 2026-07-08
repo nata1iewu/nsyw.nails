@@ -89,7 +89,6 @@ export default function Book() {
       <main className="mx-auto max-w-2xl px-6 pt-16 pb-24">
         <h1 className="font-display text-4xl text-inkDeep mb-4">Pick your appointment</h1>
         <form onSubmit={handleSubmit} className="space-y-10">
-          {/* 1. Removal */}
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Removal</h2>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -102,7 +101,6 @@ export default function Book() {
             </div>
           </div>
 
-          {/* 2. Slots / Waitlist */}
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Open slots</h2>
             {eligibleSlots?.length === 0 ? (
@@ -111,9 +109,9 @@ export default function Book() {
                   <p>You're on the list! ✿</p>
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
-                    <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1" />
-                    <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1" />
-                    <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1" />
+                    <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+                    <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+                    <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
                     <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-mist">
                       {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
                     </button>
@@ -131,19 +129,16 @@ export default function Book() {
             )}
           </div>
 
-          {/* 3. Length */}
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Length</h2>
             <div className="grid gap-2">{SIZES.map((s) => <button type="button" key={s.id} onClick={() => setSizeId(s.id)} className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line"}`}><span>{s.label}</span><span className="text-umber font-display text-lg">${s.price}</span></button>)}</div>
           </div>
 
-          {/* 4. Design tier */}
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Design tier</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{TIERS.map((tier) => <SwatchTier key={tier.id} tier={tier} interactive selected={tierId === tier.id} onClick={() => setTierId(tier.id)} />)}</div>
           </div>
 
-          {/* Submit */}
           <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
             {status === "submitting" ? "Sending..." : "Request this slot"}
           </button>
