@@ -24,7 +24,7 @@ export default function Services() {
           tier that matches how detailed you want the set.
         </p>
         <p className="text-base text-ink/60 mb-14">
-          {DEPOSIT_NOTE} DM @nsyw.nails for a price quote if you're not sure where your inspo
+          {DEPOSIT_NOTE} DM @nsywnails for a price quote if you're not sure where your inspo
           falls!
         </p>
 
