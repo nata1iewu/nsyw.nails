@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getBookings, setBookingStatus, setSlotStatus } from "@/lib/kv";
