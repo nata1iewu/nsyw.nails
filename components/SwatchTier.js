@@ -5,15 +5,13 @@ export default function SwatchTier({ tier, selected = false, onClick, interactiv
     <Comp
       type={interactive ? "button" : undefined}
       onClick={onClick}
-      className={`group flex flex-col items-center gap-3 rounded-2xl p-4 text-left transition ${
-        interactive ? "cursor-pointer" : ""
-      } ${
-        selected
+      className={`group flex flex-col items-center gap-3 rounded-2xl p-4 text-left transition ${interactive ? "cursor-pointer" : ""
+        } ${selected
           ? "bg-mist ring-2 ring-inkDeep"
           : interactive
-          ? "hover:bg-mist/70 ring-1 ring-line"
-          : ""
-      }`}
+            ? "hover:bg-mist/70 ring-1 ring-line"
+            : ""
+        }`}
     >
       <span
         aria-hidden
