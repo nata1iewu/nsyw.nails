@@ -19,6 +19,7 @@ function formatTime(timeStr) {
 }
 
 export default function Book() {
+  const [hasMounted, setHasMounted] = useState(false);
   const [slots, setSlots] = useState(null);
   const [slotId, setSlotId] = useState("");
   const [sizeId, setSizeId] = useState("");
@@ -38,6 +39,7 @@ export default function Book() {
       .then((r) => r.json())
       .then((data) => setSlots(data.slots || []))
       .catch(() => setSlots([]));
+    setHasMounted(true);
   }, []);
 
   // Only show removal-friendly (3 hr) slots once a removal is selected.
@@ -103,6 +105,18 @@ export default function Book() {
     } catch {
       setWaitlistStatus("error");
     }
+  }
+
+  if (!hasMounted) {
+    return (
+      <>
+        <Nav />
+        <main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center">
+          <p className="text-base text-ink/50">Loading booking portal…</p>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   if (status === "done") {
