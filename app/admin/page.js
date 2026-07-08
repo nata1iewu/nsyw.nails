@@ -24,16 +24,17 @@ export default function Admin() {
 
   async function handleAddSlot() {
     if (!date || !time) return alert("Fill in date and time!");
-    const res = await fetch('/api/admin/add-slot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: Date.now().toString(), date, time, status: "available" })
+    const res = await fetch("/api/admin/add-slot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: Date.now().toString(), date, time, status: "available" }),
     });
     if (res.ok) {
       alert("Slot added successfully!");
       setDate(""); setTime("");
+      fetchData();
     } else {
-      alert("Failed to add slot. Check Vercel logs.");
+      alert("Failed to add slot.");
     }
   }
 
@@ -42,24 +43,15 @@ export default function Admin() {
       <main className="mx-auto max-w-sm px-6 py-28">
         <h1 className="text-2xl mb-6">Admin Login</h1>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-xl" />
-        <button
-          onClick={async () => {
-            const res = await fetch("/api/admin/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ password }),
-            });
-
-            if (res.ok) {
-              setAuthed(true);
-            } else {
-              alert("Wrong password.");
-            }
-          }}
-          className="w-full mt-3 bg-black text-white p-3 rounded-full"
-        >
-          Log in
-        </button>
+        <button onClick={async () => {
+          const res = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password }),
+          });
+          if (res.ok) setAuthed(true);
+          else alert("Wrong password.");
+        }} className="w-full mt-3 bg-black text-white p-3 rounded-full">Log in</button>
       </main>
     );
   }
@@ -72,10 +64,10 @@ export default function Admin() {
         <div className="flex gap-2">
           <input value={date} onChange={(e) => setDate(e.target.value)} placeholder="07/09" className="p-2 border rounded" />
           <input value={time} onChange={(e) => setTime(e.target.value)} placeholder="2:00 PM" className="p-2 border rounded" />
-          <button onClick={handleAddSlot} className="bg-blue-600 text-white px-4 py-2 rounded">Add</button>
+          <button onClick={handleAddSlot} className="bg-black text-white px-4 py-2 rounded">Add</button>
         </div>
       </div>
-      <div className="mb-10">
+      <div>
         <h2 className="text-xl mb-4">Waitlist ({waitlist.length})</h2>
         {waitlist.map((w, i) => <div key={i} className="py-2 border-b">{w.name} - {w.phone}</div>)}
       </div>
