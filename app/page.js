@@ -3,7 +3,6 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
-import Botanical from "@/components/Botanical";
 import { TIERS, LOYALTY_NOTE } from "@/lib/pricing";
 
 export default function Home() {
@@ -14,11 +13,6 @@ export default function Home() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <Botanical className="pointer-events-none absolute -top-6 -left-10 h-64 w-64 text-ink/25 sm:h-80 sm:w-80" />
-          <Botanical
-            flip
-            className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 text-ink/20 sm:h-80 sm:w-80"
-          />
           <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
             <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
               {/* Text */}

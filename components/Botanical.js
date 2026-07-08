@@ -45,11 +45,9 @@ export default function Botanical({ className = "", flip = false }) {
               strokeWidth="0.9"
             />
             <path
-              d={`M${stalkX} ${stalkY} Q${mx + nx * 0.6 - ny * 0.18} ${
-                my + ny * 0.6 + nx * 0.18
-              } ${tipX} ${tipY} Q${mx + nx * 0.6 + ny * 0.18} ${
-                my + ny * 0.6 - nx * 0.18
-              } ${stalkX} ${stalkY} Z`}
+              d={`M${stalkX} ${stalkY} Q${mx + nx * 0.6 - ny * 0.18} ${my + ny * 0.6 + nx * 0.18
+                } ${tipX} ${tipY} Q${mx + nx * 0.6 + ny * 0.18} ${my + ny * 0.6 - nx * 0.18
+                } ${stalkX} ${stalkY} Z`}
               stroke="currentColor"
               strokeWidth="0.9"
               strokeLinejoin="round"

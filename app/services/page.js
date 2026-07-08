@@ -3,7 +3,6 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
-import Botanical from "@/components/Botanical";
 import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE } from "@/lib/pricing";
 
 export const metadata = { title: "Services & Pricing — Nat W Nails" };
@@ -13,7 +12,6 @@ export default function Services() {
     <>
       <Nav />
       <main className="relative mx-auto max-w-5xl px-6 pt-16 pb-24 overflow-hidden">
-        <Botanical className="pointer-events-none absolute -top-4 -right-16 h-56 w-56 text-ink/15 hidden sm:block" />
 
         <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Gel-X</p>
         <h1 className="font-display text-4xl sm:text-5xl text-inkDeep mb-2">
