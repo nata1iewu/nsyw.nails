@@ -40,7 +40,7 @@ export default function Admin() {
   }
 
   async function handleBulkAdd() {
-    // Expects input like: 07/09, 10:00 AM, 12:00 PM, 2:00 PM
+    // Expects input like: 2026-07-09, 10:00, 12:00, 14:00 (24-hour time)
     const parts = bulkInput.split(',').map(p => p.trim());
     if (parts.length < 2) return alert("Format: Date, Time1, Time2...");
 
@@ -97,19 +97,30 @@ export default function Admin() {
         {/* Single Slot Add */}
         <h2 className="text-lg font-bold mb-4">Add Single Slot</h2>
         <div className="flex gap-2 mb-8">
-          <input value={date} onChange={(e) => setDate(e.target.value)} placeholder="07/09" className="p-2 border rounded" />
-          <input value={time} onChange={(e) => setTime(e.target.value)} placeholder="2:00 PM" className="p-2 border rounded" />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded" />
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="p-2 border rounded" />
           <button onClick={handleAddSlot} className="bg-black text-white px-4 py-2 rounded">Add</button>
         </div>
 
         {/* Bulk Slot Add */}
         <h2 className="text-lg font-bold mb-2">Bulk Add Slots</h2>
-        <p className="text-xs text-gray-500 mb-2">Format: Date, Time, Time (e.g., 07/09, 10:00 AM, 12:00 PM)</p>
+        <p className="text-xs text-gray-500 mb-2">Format: Date, Time, Time (e.g., 2026-07-09, 10:00, 14:00) — use 24-hour time</p>
         <div className="flex gap-2">
-          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="07/09, 10:00 AM, 12:00 PM" className="w-full p-2 border rounded" />
+          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="2026-07-09, 10:00, 14:00" className="w-full p-2 border rounded" />
           <button onClick={handleBulkAdd} className="bg-black text-white px-4 py-2 rounded">Bulk Add</button>
         </div>
       </div>
+      <button onClick={async () => {
+        if (confirm("Are you sure? This will delete ALL slots, including valid upcoming ones.")) {
+          const res = await fetch("/api/admin/add-slot", { method: "DELETE" });
+          if (res.ok) {
+            alert("All slots cleared.");
+            fetchData();
+          } else {
+            alert("Failed to clear slots.");
+          }
+        }
+      }} className="text-red-500 text-sm underline mt-3">Clear All Slots</button>
 
       {/* Waitlist Section */}
       <div>
