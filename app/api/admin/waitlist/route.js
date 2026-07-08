@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getWaitlist, addToWaitlist } from '@/lib/kv';
+import { getWaitlist, addToWaitlist, clearWaitlist } from '@/lib/kv';
 
 export async function GET() {
     try {
-        // Use the function already defined in your lib/kv.js
         const waitlist = await getWaitlist();
         return NextResponse.json({ waitlist: waitlist || [] });
     } catch (error) {
@@ -14,7 +13,6 @@ export async function GET() {
 export async function POST(req) {
     try {
         const body = await req.json();
-        // Use the function already defined in your lib/kv.js
         await addToWaitlist(body);
         return NextResponse.json({ message: "Success" });
     } catch (error) {
