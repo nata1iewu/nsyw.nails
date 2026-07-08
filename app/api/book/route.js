@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import { getSlots, setSlotStatus, addBooking } from "@/lib/kv";
 import { priceFor, SIZES, TIERS, REMOVALS } from "@/lib/pricing";
@@ -47,8 +48,7 @@ export async function POST(request) {
 
   try {
     await notifyOwner(
-      `New booking request: ${name} (${phone}) — ${slot.date} ${slot.time} — ${size.label}, Tier ${tier.label}${
-        removal ? `, ${removal.label}` : ""
+      `New booking request: ${name} (${phone}) — ${slot.date} ${slot.time} — ${size.label}, Tier ${tier.label}${removal ? `, ${removal.label}` : ""
       } — $${price}. Approve in your admin page.`
     );
   } catch (e) {
