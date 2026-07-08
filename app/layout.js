@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Beau_Rivage, EB_Garamond } from "next/font/google";
+import { Cormorant_Garamond, Great_Vibes, EB_Garamond } from "next/font/google";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -8,14 +8,12 @@ const display = Cormorant_Garamond({
   variable: "--font-display",
   display: "swap",
 });
-
-const script = Beau_Rivage({
+const script = Great_Vibes({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-script",
   display: "swap",
 });
-
 const body = EB_Garamond({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
