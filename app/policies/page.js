@@ -17,7 +17,7 @@ export default function Policies() {
         </h1>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">▶ Most important</span></h2>
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">○ Most important</span></h2>
           <p className="text-ink/90 leading-relaxed">
             Be respectful to me and the space I am working in. I work from my dorm, which is
             shared with other people, and the last thing I want to do is inconvenience my
@@ -38,7 +38,7 @@ export default function Policies() {
         </section>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">▶ Show up on time</span></h2>
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">○ Show up on time</span></h2>
           <p className="text-ink/90 leading-relaxed">
             I don't mind if you show up 5–10 minutes early but keep in mind I might not be
             ready for you until your scheduled time.
