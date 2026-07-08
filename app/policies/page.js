@@ -9,7 +9,6 @@ export default function Policies() {
     <>
       <Nav />
       <main className="relative mx-auto max-w-3xl px-6 pt-16 pb-24 overflow-hidden">
-        <Botanical className="pointer-events-none absolute -top-6 -left-16 h-56 w-56 text-ink/15 hidden sm:block" />
 
         <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Before you book</p>
         <h1 className="font-display text-4xl sm:text-5xl text-inkDeep mb-14">
