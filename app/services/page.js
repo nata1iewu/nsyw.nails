@@ -15,7 +15,7 @@ export default function Services() {
       <main className="relative mx-auto max-w-5xl px-6 pt-16 pb-24 overflow-hidden">
         <Botanical className="pointer-events-none absolute -top-4 -right-16 h-56 w-56 text-ink/15 hidden sm:block" />
 
-        <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Gel manicure</p>
+        <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Gel-X</p>
         <h1 className="font-display text-4xl sm:text-5xl text-inkDeep mb-2">
           Pricing <span className="font-script text-5xl sm:text-6xl text-umber">Information</span>
         </h1>
@@ -24,8 +24,8 @@ export default function Services() {
           tier that matches how detailed you want the set.
         </p>
         <p className="text-base text-ink/60 mb-14">
-          {DEPOSIT_NOTE} DM @nsyw.nails for a price quote if you're not sure where your idea
-          falls.
+          {DEPOSIT_NOTE} DM @nsyw.nails for a price quote if you're not sure where your inspo
+          falls!
         </p>
 
         {/* Length pricing */}
@@ -53,13 +53,8 @@ export default function Services() {
             ))}
           </div>
           <p className="mt-3 text-sm text-ink/50">
-            Removals are for returning clients only — I don't do foreign soak-offs/removals on
-            sets from another tech. If your set was done here, it can be included; otherwise
-            please have it removed before your appointment.
-          </p>
-          <p className="mt-2 text-sm text-ink/50">
-            Appointments typically run 2 hours. If your appointment includes a removal, it may
-            run closer to 3 hours or be scheduled as the last appointment of the day.
+            I <span className="font-medium text-inkDeep">DO NOT</span> do foreign soak-offs/removals
+            Please ensure that if you have a set on that was not done by me that you have it removed before your appointment.
           </p>
         </section>
 
@@ -73,8 +68,7 @@ export default function Services() {
             ))}
           </div>
           <p className="mb-10 text-sm text-ink/50">
-            Tier 4 starts at +$15 — final add-on depends on the design, confirmed before your
-            appointment.
+            Tier 4 starts at +$15 — For more intricate and complicated designs
           </p>
 
           {TIERS.filter((t) => t.gallery).map((tier) => (
@@ -110,7 +104,7 @@ export default function Services() {
         <section className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line/70 p-8">
           <h2 className="font-display text-xl italic text-inkDeep mb-3">Booking policy</h2>
           <ul className="space-y-2 text-base text-ink/75 list-disc pl-5">
-            <li>Appointment only — no walk-ins.</li>
+            <li>Appointment Only</li>
             <li>New slots are posted monthly on a first-come, first-served basis.</li>
             <li>$5 deposit via Zelle required to hold your slot.</li>
             <li>Your request is confirmed once it's manually approved.</li>

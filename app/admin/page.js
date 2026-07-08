@@ -234,9 +234,8 @@ export default function Admin() {
                 {b.name} — {b.date} · {b.time}
               </span>
               <span
-                className={`text-xs uppercase ${
-                  b.status === "approved" ? "text-green-700" : "text-ink/40"
-                }`}
+                className={`text-xs uppercase ${b.status === "approved" ? "text-green-700" : "text-ink/40"
+                  }`}
               >
                 {b.status}
               </span>

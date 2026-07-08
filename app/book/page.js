@@ -80,8 +80,7 @@ export default function Book() {
           </h1>
           <p className="text-ink/70 mb-8 text-lg">
             Send your ${DEPOSIT_AMOUNT} deposit via Zelle to{" "}
-            <span className="text-inkDeep font-medium">626-295-8572</span> (no note needed — an
-            emoji is fine if one's required). Your slot is confirmed once I approve your
+            <span className="text-inkDeep font-medium">626-295-8572</span> (DO NOT add a note. If one is required, add any emoji). Your slot is confirmed once I approve your
             request.
           </p>
           <a
@@ -90,7 +89,7 @@ export default function Book() {
             rel="noreferrer"
             className="text-umber hover:underline"
           >
-            Questions? DM @nsyw.nails
+            Questions? DM me on instagram! @nsyw.nails
           </a>
         </main>
         <Footer />
@@ -118,8 +117,7 @@ export default function Book() {
             {slots === null && <p className="text-base text-ink/50">Loading availability…</p>}
             {slots !== null && slots.length === 0 && (
               <p className="text-base text-ink/60 rounded-xl bg-stoneDeep/60 ring-1 ring-line/70 p-4">
-                No open slots right now — check back soon or follow @nsyw.nails for when new
-                dates drop.
+                No open slots right now — follow @nsyw.nails on instagram for all booking updates!
               </p>
             )}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -128,11 +126,10 @@ export default function Book() {
                   type="button"
                   key={s.id}
                   onClick={() => setSlotId(s.id)}
-                  className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
-                    slotId === s.id
-                      ? "bg-inkDeep text-mist ring-inkDeep"
-                      : "ring-line hover:bg-mist text-ink"
-                  }`}
+                  className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${slotId === s.id
+                    ? "bg-inkDeep text-mist ring-inkDeep"
+                    : "ring-line hover:bg-mist text-ink"
+                    }`}
                 >
                   <span className="block font-medium">{formatDate(s.date)}</span>
                   <span className="block opacity-80">
@@ -155,9 +152,8 @@ export default function Book() {
                   type="button"
                   key={s.id}
                   onClick={() => setSizeId(s.id)}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
-                    sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
-                  }`}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                    }`}
                 >
                   <span>{s.label}</span>
                   <span className="text-umber font-display text-lg">${s.price}</span>
@@ -188,16 +184,14 @@ export default function Book() {
               4. Removal <span className="text-base text-ink/50 font-body not-italic">(if needed)</span>
             </h2>
             <p className="mb-3 text-sm text-ink/50">
-              Removals are only offered for sets originally done here — no foreign removals.
-              If you need one, please pick a slot marked "extended" above where possible.
+              NO FOREIGN REMOVALS
             </p>
             <div className="grid gap-2 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={() => setRemovalId("")}
-                className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
-                  removalId === "" ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
-                }`}
+                className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                  }`}
               >
                 None needed
               </button>
@@ -206,9 +200,8 @@ export default function Book() {
                   type="button"
                   key={r.id}
                   onClick={() => setRemovalId(r.id)}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
-                    removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
-                  }`}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                    }`}
                 >
                   <span>{r.label}</span>
                   <span className="text-umber font-display text-lg">+${r.price}</span>

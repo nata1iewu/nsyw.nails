@@ -17,7 +17,7 @@ export default function Policies() {
         </h1>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3">Most important</h2>
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">Most important</span></h2>
           <p className="text-ink/80 leading-relaxed">
             Be respectful to me and the space I am working in. I work from my dorm, which is
             shared with other people, and the last thing I want to do is inconvenience my
@@ -32,13 +32,13 @@ export default function Policies() {
         <section className="mb-10">
           <p className="text-ink/80 leading-relaxed">
             I <span className="font-medium text-inkDeep">no longer do foreign soak-offs or
-              removals</span> So please try to have your previous set removed before coming (unless I did
+              removals.</span> So please try to have your previous set removed before coming (unless I did
             your previous set).
           </p>
         </section>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3">Show up on time</h2>
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">Show up on time</span></h2>
           <p className="text-ink/80 leading-relaxed">
             I don't mind if you show up 5–10 minutes early — just keep in mind I might not be
             ready for you until your scheduled time.
@@ -48,7 +48,7 @@ export default function Policies() {
         <section className="mb-10">
           <p className="text-ink/80 leading-relaxed">
             I don't mind if you bring a guest along to your appointment — just{" "}
-            <span className="font-medium text-inkDeep">please let me know in advance</span>.
+            <span className="font-medium text-inkDeep">let me know in advance</span>.
           </p>
         </section>
 
@@ -63,7 +63,7 @@ export default function Policies() {
           <p className="text-ink/80 leading-relaxed">
             <span className="font-medium text-inkDeep">No-shows</span> or a failure to
             communicate will result in you losing your deposit — and a new deposit will be
-            required if you want to rebook. Please note that I've been very booked, so if you
+            required if you want to rebook. Please note that I've been consistently booked out, so if you
             cancel or don't show up, it will{" "}
             <span className="font-medium text-inkDeep">not be guaranteed</span> that you get
             another appointment.
