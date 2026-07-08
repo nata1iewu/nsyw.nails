@@ -149,6 +149,15 @@ export default function Book() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{TIERS.map((tier) => <SwatchTier key={tier.id} tier={tier} interactive selected={tierId === tier.id} onClick={() => setTierId(tier.id)} />)}</div>
           </div>
 
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">5. Your info</h2>
+            <div className="grid gap-3 max-w-md">
+              <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+              <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+              <input placeholder="Instagram (optional)" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+            </div>
+          </div>
+
           {status === "done" ? (
             <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
               <h3 className="font-display text-lg text-inkDeep mb-2">Request sent! ✿</h3>
