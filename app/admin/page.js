@@ -7,6 +7,7 @@ export default function Admin() {
   const [waitlist, setWaitlist] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [bulkInput, setBulkInput] = useState("");
 
   async function fetchData() {
     try {
@@ -37,9 +38,10 @@ export default function Admin() {
       alert("Failed to add slot.");
     }
   }
+
   async function handleBulkAdd() {
     // Expects input like: 07/09, 10:00 AM, 12:00 PM, 2:00 PM
-    const parts = date.split(',').map(p => p.trim());
+    const parts = bulkInput.split(',').map(p => p.trim());
     if (parts.length < 2) return alert("Format: Date, Time1, Time2...");
 
     const dateStr = parts[0];
@@ -60,7 +62,7 @@ export default function Admin() {
 
     if (res.ok) {
       alert("Slots added!");
-      setDate(""); // Clear the input
+      setBulkInput(""); // Clear the input
       fetchData(); // Refresh the list
     } else {
       alert("Failed to add slots.");
@@ -104,7 +106,7 @@ export default function Admin() {
         <h2 className="text-lg font-bold mb-2">Bulk Add Slots</h2>
         <p className="text-xs text-gray-500 mb-2">Format: Date, Time, Time (e.g., 07/09, 10:00 AM, 12:00 PM)</p>
         <div className="flex gap-2">
-          <input value={date} onChange={(e) => setDate(e.target.value)} placeholder="07/09, 10:00 AM, 12:00 PM" className="w-full p-2 border rounded" />
+          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="07/09, 10:00 AM, 12:00 PM" className="w-full p-2 border rounded" />
           <button onClick={handleBulkAdd} className="bg-black text-white px-4 py-2 rounded">Bulk Add</button>
         </div>
       </div>
