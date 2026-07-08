@@ -57,11 +57,12 @@ export default function Book() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
       });
-      if (!res.ok) throw new Error("Booking failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong.");
       setStatus("done");
-    } catch {
+    } catch (err) {
       setStatus("error");
-      setErrorMsg("Something went wrong.");
+      setErrorMsg(err.message);
     }
   }
 
@@ -84,39 +85,76 @@ export default function Book() {
 
   if (!hasMounted) return <><Nav /><main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center"><p className="text-base text-ink/50">Loading booking portal…</p></main><Footer /></>;
 
-  if (status === "done") {
-    return (<><Nav /><main className="mx-auto max-w-xl px-6 py-28 text-center"><h1 className="font-display text-3xl text-inkDeep mb-4">You're booked ✿</h1><p>Check your messages!</p></main><Footer /></>);
-  }
-
   return (
     <>
       <Nav />
       <main className="mx-auto max-w-2xl px-6 pt-16 pb-24">
+        <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Book a slot</p>
+        <h1 className="font-display text-4xl text-inkDeep mb-4">Pick your <span className="font-script text-5xl text-umber">appointment</span></h1>
+        <p className="text-ink/70 mb-10 text-lg">Slots are posted monthly and go fast. Choose an open time, your service, and confirm with a ${DEPOSIT_AMOUNT} deposit.</p>
+
         <form onSubmit={handleSubmit} className="space-y-10">
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Removal</h2>
             <div className="grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 ring-1 ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None</button>
-              {REMOVALS.map((r) => <button type="button" key={r.id} onClick={() => setRemovalId(r.id)} className={`rounded-xl px-4 py-3 ring-1 ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>{r.label}</button>)}
+              <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"}`}>None needed</button>
+              {REMOVALS.map((r) => (
+                <button type="button" key={r.id} onClick={() => setRemovalId(r.id)} className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"}`}>
+                  <span>{r.label}</span>
+                  <span className="text-umber font-display text-lg">+${r.price}</span>
+                </button>
+              ))}
             </div>
           </div>
+
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Slots</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Open slots</h2>
             {eligibleSlots?.length === 0 ? (
-              <div className="p-6 rounded-2xl bg-stoneDeep/60">
-                <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full mb-2 p-2 rounded-xl" />
-                <input required placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full mb-2 p-2 rounded-xl" />
-                <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="w-full mb-4 p-2 rounded-xl" />
-                <button type="button" onClick={handleWaitlistSubmit} className="bg-inkDeep text-mist px-6 py-2 rounded-full">{waitlistStatus === "submitting" ? "Joining..." : "Join Waitlist"}</button>
+              <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line/70 p-6 text-center">
+                <h3 className="font-display text-lg text-inkDeep mb-2">All slots are fully booked!</h3>
+                <div className="grid gap-3 max-w-md mx-auto">
+                  <input required placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
+                  <input required type="tel" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
+                  <input required placeholder="Instagram Handle" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
+                  <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-sm font-medium text-mist">
+                    {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {eligibleSlots?.map(s => <button type="button" key={s.id} onClick={() => setSlotId(s.id)} className={`p-3 rounded-xl ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}>{formatDate(s.date)}</button>)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {eligibleSlots?.map((s) => (
+                  <button type="button" key={s.id} onClick={() => setSlotId(s.id)} className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${slotId === s.id ? "bg-inkDeep text-mist ring-inkDeep" : "ring-line hover:bg-mist text-ink"}`}>
+                    <span className="block font-medium">{formatDate(s.date)}</span>
+                    <span className="block opacity-80">{formatTime(s.time)}</span>
+                  </button>
+                ))}
               </div>
             )}
           </div>
-          {/* Add Sections 3 (Size), 4 (Tier), 5 (Info) here as before */}
-          <button type="submit" className="w-full bg-inkDeep text-mist py-3 rounded-full">Request Slot</button>
+
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Length</h2>
+            <div className="grid gap-2">{SIZES.map((s) => <button type="button" key={s.id} onClick={() => setSizeId(s.id)} className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"}`}><span>{s.label}</span><span className="text-umber font-display text-lg">${s.price}</span></button>)}</div>
+          </div>
+
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Design tier</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{TIERS.map((tier) => <SwatchTier key={tier.id} tier={tier} interactive selected={tierId === tier.id} onClick={() => setTierId(tier.id)} />)}</div>
+          </div>
+
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">5. Your info</h2>
+            <div className="grid gap-3">
+              <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
+              <input required type="tel" placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
+              <input required placeholder="Instagram username" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line text-base" />
+            </div>
+          </div>
+
+          <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 font-body text-lg text-mist transition hover:bg-umber disabled:opacity-40">
+            {status === "submitting" ? "Sending request…" : "Request this slot"}
+          </button>
         </form>
       </main>
       <Footer />
