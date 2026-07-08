@@ -1,6 +1,6 @@
 // app/api/waitlist/route.js
 import { NextResponse } from 'next/server';
-import { getWaitlist } from '@/lib/kv'; // Ensure this exists in your lib/kv.js
+import { getWaitlist, addToWaitlist } from '@/lib/kv'; // Ensure this exists in your lib/kv.js
 
 export async function GET() {
     const waitlist = await getWaitlist();
@@ -20,5 +20,19 @@ export async function POST(req) {
         return new Response(JSON.stringify({ message: "Success" }), { status: 200 });
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    }
+}
+// In your user-facing form submit handler:
+async function handleWaitlistSubmit(e) {
+    e.preventDefault(); // <--- THIS IS REQUIRED to stop the refresh
+
+    const res = await fetch("/api/waitlist", {
+        method: "POST",
+        // ... rest of your fetch logic
+    });
+
+    if (res.ok) {
+        alert("Joined waitlist!");
+        // Clear form fields here
     }
 }
