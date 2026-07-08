@@ -24,9 +24,9 @@ const body = EB_Garamond({
 });
 
 export const metadata = {
-  title: "Nat W Nails — Gel Manicures",
+  title: "nsyw.nails — your UCSD nail tech",
   description:
-    "Gel manicures with precision. Book a slot with Nat W Nails — @nsyw.nails.",
+    "Gel-X manicures with a specialization in intricate art, based on campus at UCSD and in Los Angeles, California outside of the active school year! Book with me now! — @nsyw.nails.",
 };
 
 export default function RootLayout({ children }) {

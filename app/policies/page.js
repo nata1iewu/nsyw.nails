@@ -32,14 +32,8 @@ export default function Policies() {
         <section className="mb-10">
           <p className="text-ink/80 leading-relaxed">
             I <span className="font-medium text-inkDeep">no longer do foreign soak-offs or
-            removals</span> — removals are for returning clients only, on sets I originally
-            did. So please try to have your previous set removed before coming (unless I did
+              removals</span> So please try to have your previous set removed before coming (unless I did
             your previous set).
-          </p>
-          <p className="mt-3 text-ink/80 leading-relaxed">
-            Appointments typically run 2 hours. If yours includes a removal, I'll usually
-            extend it to 3 hours or book it as the last appointment of the day, so it doesn't
-            run into anyone else's slot.
           </p>
         </section>
 

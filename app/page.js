@@ -20,16 +20,17 @@ export default function Home() {
           />
           <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
             <p className="text-sm uppercase tracking-[0.15em] text-umber mb-4">
-              Gel manicures · by appointment
+              Gel-X Manicures · Specialized in intricate nail art
             </p>
             <h1 className="font-display text-5xl sm:text-6xl leading-[1.05] text-inkDeep max-w-2xl">
-              Precision gel,
+              Currently in:
               <br />
-              <span className="font-script text-6xl sm:text-7xl text-umber">painted to last</span>
+              <span className="font-script text-6xl sm:text-7xl text-umber">Los Angeles</span>
             </h1>
             <p className="mt-6 max-w-md text-ink/70 font-body">
-              Nat W Nails is a private gel manicure studio. Slots open monthly, first come,
-              first served — a small $5 deposit holds your seat.
+              Hi everyone! My name is Natalie and I've been doing nails for roughly 2 years now!
+              Over the school year, I am on campus at UCSD and dorm based, while outside of the active school year, I am based in Los Angeles, California!
+              I offer Gel-X and specialize in intricate nail art with a love for asian-style designs! For affordable and amazing nail sets, book now!!'
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
@@ -53,7 +54,7 @@ export default function Home() {
           <div className="mx-auto max-w-5xl px-6 py-14">
             <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Design tiers</p>
             <h2 className="font-display text-2xl italic text-inkDeep mb-8 max-w-md">
-              Every set starts with a base color — how far you take the design sets the tier.
+              Every set tailored to your style and preferences — how far you take the design sets the tier.
             </h2>
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {TIERS.map((tier) => (
@@ -67,18 +68,18 @@ export default function Home() {
         <section className="mx-auto max-w-5xl px-6 py-16 grid gap-10 sm:grid-cols-4">
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Appointment only</p>
-            <p className="text-base text-ink/70">No walk-ins. All bookings go through the site.</p>
+            <p className="text-base text-ink/70">All bookings go through the site</p>
           </div>
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Monthly slots</p>
             <p className="text-base text-ink/70">
-              New availability is posted each month — check back or follow @nsyw.nails.
+              New availability is posted each month — all updates are posted on instagram @nsyw.nails.
             </p>
           </div>
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">$5 deposit</p>
             <p className="text-base text-ink/70">
-              Sent via Zelle to secure your slot. Confirmed once your request is approved.
+              Required after confirming your booking.
             </p>
           </div>
           <div>
