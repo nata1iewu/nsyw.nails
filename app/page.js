@@ -33,12 +33,12 @@ export default function Home() {
                     Los Angeles
                   </span>
                 </h1>
-                <p className="mt-6 max-w-md text-ink/70 font-body">
+                <p className="mt-6 max-w-md text-ink/90 font-body">
                   Hi everyone! My name is Natalie and I've been doing nails for roughly 2 years
                   now! Over the school year, I am on campus at UCSD and dorm based, while
                   outside of the active school year, I am based in Los Angeles, California! I
                   offer Gel-X and specialize in intricate nail art with a love for asian-style
-                  designs! For affordable and beautiful nail sets, book now!!'
+                  designs! Thank you for visiting my site!!
                 </p>
                 <div className="mt-9 flex flex-wrap items-center gap-4">
                   <Link
@@ -93,12 +93,13 @@ export default function Home() {
         <section className="mx-auto max-w-5xl px-6 py-16 grid gap-10 sm:grid-cols-4">
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Appointment only</p>
-            <p className="text-base text-ink/70">All bookings go through the site</p>
+            <p className="text-base text-ink/70">All bookings go through the site!</p>
           </div>
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Monthly slots</p>
             <p className="text-base text-ink/70">
-              New availability is posted each month — all updates are posted on instagram
+              New availability is posted each month!
+              All updates are posted on instagram
               @nsyw.nails.
             </p>
           </div>
