@@ -42,7 +42,7 @@ export default function Book() {
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 
-  const canSubmit = slotId && sizeId && tierId && name && phone;
+  const canSubmit = slotId && sizeId && tierId && name && phone && instagram;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -98,7 +98,7 @@ export default function Book() {
             <div className="grid gap-3 max-w-md">
               <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
               <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
-              <input placeholder="Instagram (optional)" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+              <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
             </div>
           </div>
 
