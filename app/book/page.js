@@ -38,7 +38,7 @@ export default function Book() {
 
   const eligibleSlots = useMemo(() => {
     if (!slots) return null;
-    if (!removalId) return slots;
+    if (!removalId) return slots.filter((s) => (s.duration || 120) < 180);
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 

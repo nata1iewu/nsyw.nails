@@ -166,7 +166,20 @@ export default function Admin() {
 
       {/* Bookings Section */}
       <div className="mb-10">
-        <h2 className="text-xl mb-4">Bookings ({bookings.length})</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl">Bookings ({bookings.length})</h2>
+          <button onClick={async () => {
+            if (confirm("Are you sure? This will delete ALL booking records.")) {
+              const res = await fetch("/api/admin/bookings", { method: "DELETE" });
+              if (res.ok) {
+                alert("All bookings cleared.");
+                fetchData();
+              } else {
+                alert("Failed to clear bookings.");
+              }
+            }
+          }} className="text-red-500 text-sm underline">Clear Bookings</button>
+        </div>
         {bookings.length === 0 ? (
           <p className="text-sm text-gray-500">No bookings yet.</p>
         ) : (
