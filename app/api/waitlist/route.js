@@ -1,22 +1,21 @@
 // app/api/waitlist/route.js
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { addToWaitlist } from "@/lib/kv";
 
 export async function POST(req) {
     try {
-        const { name, phone, instagram } = await req.json();
+        const body = await req.json();
+        const { name, phone, instagram } = body;
 
-        // Enforce the requirement for all three fields
+        // Strict check
         if (!name || !phone || !instagram) {
-            return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
+            return Response.json({ error: "Missing fields" }, { status: 400 });
         }
 
         await addToWaitlist({ name, phone, instagram });
-        return new Response(JSON.stringify({ message: "Success" }), { status: 200 });
 
+        return Response.json({ message: "Success" }, { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+        console.error("API Error:", error);
+        return Response.json({ error: "Server error" }, { status: 500 });
     }
 }
