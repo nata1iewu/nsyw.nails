@@ -21,8 +21,6 @@ export default function Admin() {
   const [waitlist, setWaitlist] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [duration, setDuration] = useState(120);
-  const [loading, setLoading] = useState(false);
 
   async function refresh() {
     try {
@@ -37,11 +35,28 @@ export default function Admin() {
       setSlots((await slotsRes.json()).slots || []);
       setBookings((await bookingsRes.json()).bookings || []);
 
-      // Attempt to fetch waitlist if endpoint exists
       const wRes = await fetch("/api/admin/waitlist");
       if (wRes.ok) setWaitlist((await wRes.json()).waitlist || []);
     } catch (e) {
       console.error("Refresh failed", e);
+    }
+  }
+
+  async function handleAddSlot() {
+    const res = await fetch('/api/admin/add-slot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: Date.now().toString(),
+        time: `${date} ${time}`,
+        status: "available"
+      })
+    });
+    if (res.ok) {
+      alert("Slot added!");
+      setDate("");
+      setTime("");
+      refresh();
     }
   }
 
@@ -77,6 +92,24 @@ export default function Admin() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="font-display text-3xl text-ink mb-10">Studio dashboard</h1>
+
+      <Section title="Add new slot">
+        <div className="flex gap-2">
+          <input
+            type="text" placeholder="Date (e.g., 07/09)"
+            value={date} onChange={(e) => setDate(e.target.value)}
+            className="rounded-xl px-4 py-2 bg-mist ring-1 ring-line w-1/3"
+          />
+          <input
+            type="text" placeholder="Time (e.g., 2:00 PM)"
+            value={time} onChange={(e) => setTime(e.target.value)}
+            className="rounded-xl px-4 py-2 bg-mist ring-1 ring-line w-1/3"
+          />
+          <button onClick={handleAddSlot} className="rounded-full bg-inkDeep px-6 py-2 text-mist">
+            Add
+          </button>
+        </div>
+      </Section>
 
       <Section title="Waitlist">
         <ul className="divide-y divide-line/70">
