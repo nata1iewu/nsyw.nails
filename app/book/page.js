@@ -130,16 +130,15 @@ export default function Book() {
                     <p className="text-sm text-ink/70">You've successfully joined the waitlist! If there are any spots that open up, I will contact you! Thank you so much for your support!!</p>
                   </div>
                 ) : (
-                  <>
-                    <h3 className="font-display text-lg text-inkDeep mb-2">All slots are fully booked!</h3>
-                    <div className="grid gap-3 max-w-md mx-auto">
+                  <><h3 className="font-display text-lg text-inkDeep mb-2">All slots are fully booked!</h3>
+                    <form onSubmit={handleWaitlistSubmit} className="grid gap-3 max-w-md mx-auto">
                       <input required placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
                       <input required type="tel" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
                       <input required placeholder="Instagram Handle" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line text-sm" />
-                      <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-sm font-medium text-mist">
+                      <button type="submit" className="w-full rounded-full bg-inkDeep py-2.5 text-sm font-medium text-mist">
                         {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
                       </button>
-                    </div>
+                    </form>
                   </>
                 )}
               </div>
