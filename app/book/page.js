@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
@@ -30,12 +30,31 @@ export default function Book() {
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Waitlist states
+  const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | submitting | done | error
+
   useEffect(() => {
     fetch("/api/slots")
       .then((r) => r.json())
       .then((data) => setSlots(data.slots || []))
       .catch(() => setSlots([]));
   }, []);
+
+  // Only show removal-friendly (3 hr) slots once a removal is selected.
+  const eligibleSlots = useMemo(() => {
+    if (!slots) return null;
+    if (!removalId) return slots;
+    return slots.filter((s) => (s.duration || 120) >= 180);
+  }, [slots, removalId]);
+
+  // If someone picks a slot, then later selects a removal that slot doesn't
+  // support, clear the now-invalid selection so they have to re-pick.
+  useEffect(() => {
+    if (!slotId || !eligibleSlots) return;
+    if (!eligibleSlots.some((s) => s.id === slotId)) {
+      setSlotId("");
+    }
+  }, [eligibleSlots, slotId]);
 
   const price = sizeId && tierId ? priceFor(sizeId, tierId, removalId || null) : null;
   const dueAtAppointment = price != null ? Math.max(price - DEPOSIT_AMOUNT, 0) : null;
@@ -69,6 +88,23 @@ export default function Book() {
     }
   }
 
+  async function handleWaitlistSubmit(e) {
+    e.preventDefault();
+    if (!name || !phone) return;
+    setWaitlistStatus("submitting");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, instagram }),
+      });
+      if (!res.ok) throw new Error();
+      setWaitlistStatus("done");
+    } catch {
+      setWaitlistStatus("error");
+    }
+  }
+
   if (status === "done") {
     return (
       <>
@@ -80,16 +116,18 @@ export default function Book() {
           </h1>
           <p className="text-ink/70 mb-8 text-lg">
             Send your ${DEPOSIT_AMOUNT} deposit via Zelle to{" "}
-            <span className="text-inkDeep font-medium">626-295-8572</span> (DO NOT add a note. If one is required, add any emoji). Your slot is confirmed once I approve your
+            <span className="text-inkDeep font-medium">626-295-8572</span> (no note needed — an
+            emoji is fine if one's required). Your slot is confirmed once I approve your
             request.
           </p>
+
           <a
             href="https://instagram.com/nsyw.nails"
             target="_blank"
             rel="noreferrer"
             className="text-umber hover:underline"
           >
-            Questions? DM me on instagram! @nsyw.nails
+            Questions? DM @nsyw.nails
           </a>
         </main>
         <Footer />
@@ -111,80 +149,14 @@ export default function Book() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-10">
-          {/* Slots */}
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Open slots</h2>
-            {slots === null && <p className="text-base text-ink/50">Loading availability…</p>}
-            {slots !== null && slots.length === 0 && (
-              <p className="text-base text-ink/60 rounded-xl bg-stoneDeep/60 ring-1 ring-line/70 p-4">
-                No open slots right now — follow @nsyw.nails on instagram for all booking updates!
-              </p>
-            )}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {slots?.map((s) => (
-                <button
-                  type="button"
-                  key={s.id}
-                  onClick={() => setSlotId(s.id)}
-                  className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${slotId === s.id
-                    ? "bg-inkDeep text-mist ring-inkDeep"
-                    : "ring-line hover:bg-mist text-ink"
-                    }`}
-                >
-                  <span className="block font-medium">{formatDate(s.date)}</span>
-                  <span className="block opacity-80">
-                    {formatTime(s.time)}
-                    {s.duration === 180 && (
-                      <span className="ml-1 opacity-70">· extended</span>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Size */}
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Length</h2>
-            <div className="grid gap-2">
-              {SIZES.map((s) => (
-                <button
-                  type="button"
-                  key={s.id}
-                  onClick={() => setSizeId(s.id)}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
-                    }`}
-                >
-                  <span>{s.label}</span>
-                  <span className="text-umber font-display text-lg">${s.price}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tier */}
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Design tier</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {TIERS.map((tier) => (
-                <SwatchTier
-                  key={tier.id}
-                  tier={tier}
-                  interactive
-                  selected={tierId === tier.id}
-                  onClick={() => setTierId(tier.id)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Removal */}
+          {/* Removal — asked first so we can filter slots correctly */}
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">
-              4. Removal <span className="text-base text-ink/50 font-body not-italic">(if needed)</span>
+              1. Removal <span className="text-base text-ink/50 font-body not-italic">(if needed)</span>
             </h2>
             <p className="mb-3 text-sm text-ink/50">
-              NO FOREIGN REMOVALS
+              Removals are only offered for sets originally done here — no foreign removals.
+              Choosing one below will filter the open slots to ones with room for it.
             </p>
             <div className="grid gap-2 sm:grid-cols-3">
               <button
@@ -206,6 +178,132 @@ export default function Book() {
                   <span>{r.label}</span>
                   <span className="text-umber font-display text-lg">+${r.price}</span>
                 </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Slots */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Open slots</h2>
+            {removalId && (
+              <p className="mb-3 text-sm text-ink/50">
+                Showing only slots with room for a removal.
+              </p>
+            )}
+            {eligibleSlots === null && <p className="text-base text-ink/50">Loading availability…</p>}
+
+            {eligibleSlots !== null && eligibleSlots.length === 0 && (
+              <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line/70 p-6 text-center">
+                {waitlistStatus === "done" ? (
+                  <div>
+                    <h3 className="font-display text-xl text-inkDeep mb-2">You're on the waitlist! ✿</h3>
+                    <p className="text-sm text-ink/70">
+                      If a spot opens up or a client cancels, you'll be the first to know via text or DM.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="font-display text-lg text-inkDeep mb-2">All slots are fully booked!</h3>
+                    <p className="text-sm text-ink/60 max-w-md mx-auto mb-4">
+                      {removalId
+                        ? "No removal-friendly slots open right now. Join the priority waitlist below and I'll reach out if room opens up!"
+                        : "No open slots right now. Join the priority waitlist below and I'll contact you directly if a spot opens up!"}
+                    </p>
+                    <div className="grid gap-3 max-w-md mx-auto">
+                      <input
+                        required
+                        placeholder="Your Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-sm"
+                      />
+                      <input
+                        required
+                        type="tel"
+                        placeholder="Phone Number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-sm"
+                      />
+                      <input
+                        placeholder="Instagram username (optional)"
+                        value={instagram}
+                        onChange={(e) => setInstagram(e.target.value)}
+                        className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleWaitlistSubmit}
+                        disabled={!name || !phone || waitlistStatus === "submitting"}
+                        className="w-full rounded-full bg-inkDeep py-2.5 text-sm font-medium text-mist hover:bg-umber transition disabled:opacity-40"
+                      >
+                        {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
+                      </button>
+                      {waitlistStatus === "error" && (
+                        <p className="text-xs text-umber mt-1">Something went wrong. Please try again.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {eligibleSlots !== null && eligibleSlots.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {eligibleSlots.map((s) => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onClick={() => setSlotId(s.id)}
+                    className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${slotId === s.id
+                      ? "bg-inkDeep text-mist ring-inkDeep"
+                      : "ring-line hover:bg-mist text-ink"
+                      }`}
+                  >
+                    <span className="block font-medium">{formatDate(s.date)}</span>
+                    <span className="block opacity-80">
+                      {formatTime(s.time)}
+                      {(s.duration || 120) >= 180 && (
+                        <span className="ml-1 opacity-70">· extended</span>
+                      )}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Size */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Length</h2>
+            <div className="grid gap-2">
+              {SIZES.map((s) => (
+                <button
+                  type="button"
+                  key={s.id}
+                  onClick={() => setSizeId(s.id)}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                    }`}
+                >
+                  <span>{s.label}</span>
+                  <span className="text-umber font-display text-lg">${s.price}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tier */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Design tier</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {TIERS.map((tier) => (
+                <SwatchTier
+                  key={tier.id}
+                  tier={tier}
+                  interactive
+                  selected={tierId === tier.id}
+                  onClick={() => setTierId(tier.id)}
+                />
               ))}
             </div>
           </div>
