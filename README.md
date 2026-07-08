@@ -1,4 +1,4 @@
-# Nat W Nails
+# nsywnails
 
 Elegant, minimal booking site for a gel manicure studio. Built with Next.js (App Router)
 + Tailwind CSS, deployable to Vercel for free.
