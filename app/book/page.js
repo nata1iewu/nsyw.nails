@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import SwatchTier from "@/components/SwatchTier";
-import { SIZES, TIERS, REMOVALS } from "@/lib/pricing";
+import { REMOVALS } from "@/lib/pricing";
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -22,8 +21,6 @@ export default function Book() {
   const [hasMounted, setHasMounted] = useState(false);
   const [slots, setSlots] = useState(null);
   const [slotId, setSlotId] = useState("");
-  const [sizeId, setSizeId] = useState("");
-  const [tierId, setTierId] = useState("");
   const [removalId, setRemovalId] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -42,7 +39,7 @@ export default function Book() {
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 
-  const canSubmit = slotId && sizeId && tierId && name && phone && instagram;
+  const canSubmit = slotId && name && phone && instagram;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -52,7 +49,7 @@ export default function Book() {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
+        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -126,7 +123,7 @@ export default function Book() {
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
                     <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nsyw.nails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
+                      Currently fully booked! Follow @nsywnails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
                     </p>
                     <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-mist">
                       {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
@@ -145,20 +142,10 @@ export default function Book() {
             )}
           </div>
 
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Length</h2>
-            <div className="grid gap-2">{SIZES.map((s) => <button type="button" key={s.id} onClick={() => setSizeId(s.id)} className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line"}`}><span>{s.label}</span><span className="text-umber font-display text-lg">${s.price}</span></button>)}</div>
-          </div>
-
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">5. Design tier</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{TIERS.map((tier) => <SwatchTier key={tier.id} tier={tier} interactive selected={tierId === tier.id} onClick={() => setTierId(tier.id)} />)}</div>
-          </div>
-
           {status === "done" ? (
             <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
-              <h3 className="font-display text-lg text-inkDeep mb-2">Request sent! ✿</h3>
-              <p className="text-sm text-ink/70">Thank you! I've received your booking request and will confirm with you shortly via text or Instagram. Talk soon!</p>
+              <h3 className="font-display text-lg text-inkDeep mb-2">Successfully booked! ✿</h3>
+              <p className="text-sm text-ink/70">Thank you! I've received your booking and will confirm with you shortly via text or Instagram. A $5 deposit is required but DO NOT send it until I message you! Please keep a look out!</p>
             </div>
           ) : (
             <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">

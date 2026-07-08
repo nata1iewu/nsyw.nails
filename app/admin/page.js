@@ -60,8 +60,6 @@ export default function Admin() {
   }
 
   async function handleBulkAdd() {
-    // Each line: date, time, duration(optional, defaults to 120)
-    // e.g. 2026-07-09, 10:00, 180
     const lines = bulkInput.split("\n").map(l => l.trim()).filter(Boolean);
     if (lines.length === 0) return alert("Enter at least one slot line.");
 
@@ -120,7 +118,6 @@ export default function Admin() {
 
       <div className="mb-10 p-6 border rounded-2xl">
 
-        {/* Single Slot Add */}
         <h2 className="text-lg font-bold mb-4">Add Single Slot</h2>
         <div className="flex gap-2 mb-8">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded" />
@@ -133,7 +130,6 @@ export default function Admin() {
           <button onClick={handleAddSlot} className="bg-black text-white px-4 py-2 rounded">Add</button>
         </div>
 
-        {/* Bulk Slot Add */}
         <h2 className="text-lg font-bold mb-2">Bulk Add Slots</h2>
         <p className="text-xs text-gray-500 mb-2">
           One slot per line: date, time, duration (minutes, optional — defaults to 120). 180+ = removal-eligible.<br />
@@ -164,7 +160,6 @@ export default function Admin() {
         }} className="block text-red-500 text-sm underline mt-3">Clear All Slots</button>
       </div>
 
-      {/* Bookings Section */}
       <div className="mb-10">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl">Bookings ({bookings.length})</h2>
@@ -187,7 +182,7 @@ export default function Admin() {
             <div key={b.id} className="py-3 border-b">
               <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
               <div className="text-sm text-gray-600 mb-2">
-                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} · {b.size} · {b.tier} {b.removal ? `· ${b.removal}` : ""} · ${b.price} · <span className="uppercase">{b.status}</span>
+                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · <span className="uppercase">{b.status}</span>
               </div>
               {b.status === "pending" && (
                 <div className="flex gap-2">
@@ -200,7 +195,6 @@ export default function Admin() {
         )}
       </div>
 
-      {/* Waitlist Section */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl">Waitlist ({waitlist.length})</h2>

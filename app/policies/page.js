@@ -2,7 +2,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Botanical from "@/components/Botanical";
 
-export const metadata = { title: "Policies & Info — Nat W Nails" };
+export const metadata = { title: "Policies & Info — nsywnails" };
 
 export default function Policies() {
   return (
@@ -17,20 +17,20 @@ export default function Policies() {
         </h1>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">Most important</span></h2>
-          <p className="text-ink/80 leading-relaxed">
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">▶ Most important</span></h2>
+          <p className="text-ink/90 leading-relaxed">
             Be respectful to me and the space I am working in. I work from my dorm, which is
             shared with other people, and the last thing I want to do is inconvenience my
             suitemates in any way.
           </p>
-          <p className="mt-3 text-base text-ink/60 pl-4 border-l border-line">
+          <p className="mt-3 text-base text-ink/80 pl-4 border-l border-line">
             I also wish I could do everyone's nails, but academics will always be my #1
             priority.
           </p>
         </section>
 
         <section className="mb-10">
-          <p className="text-ink/80 leading-relaxed">
+          <p className="text-ink/90 leading-relaxed">
             I <span className="font-medium text-inkDeep">no longer do foreign soak-offs or
               removals.</span> So please try to have your previous set removed before coming (unless I did
             your previous set).
@@ -38,17 +38,17 @@ export default function Policies() {
         </section>
 
         <section className="mb-10">
-          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">Show up on time</span></h2>
-          <p className="text-ink/80 leading-relaxed">
-            I don't mind if you show up 5–10 minutes early — just keep in mind I might not be
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">▶ Show up on time</span></h2>
+          <p className="text-ink/90 leading-relaxed">
+            I don't mind if you show up 5–10 minutes early but keep in mind I might not be
             ready for you until your scheduled time.
           </p>
         </section>
 
         <section className="mb-10">
-          <p className="text-ink/80 leading-relaxed">
-            I don't mind if you bring a guest along to your appointment — just{" "}
-            <span className="font-medium text-inkDeep">let me know in advance</span>.
+          <p className="text-ink/90 leading-relaxed">
+            I don't mind if you bring a guest along to your appointment {" "}
+            <span className="font-medium text-inkDeep">but you need to let me know in advance</span>.
           </p>
         </section>
 
