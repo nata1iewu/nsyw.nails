@@ -54,23 +54,6 @@ export default function Book() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
       });
-      if (!res.ok) throw new Error("Booking failed");
-      setStatus("done");
-    } catch (err) {
-      setStatus("error");
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!canSubmit) return;
-    setStatus("submitting");
-    try {
-      const res = await fetch("/api/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, sizeId, tierId, removalId: removalId || null, name, phone, instagram }),
-      });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Booking failed");
@@ -79,6 +62,26 @@ export default function Book() {
     } catch (err) {
       setStatus("error");
       alert(err.message);
+    }
+  }
+
+  async function handleWaitlistSubmit() {
+    if (!name || !phone || !instagram) {
+      alert("Please fill in all fields!");
+      return;
+    }
+    setWaitlistStatus("submitting");
+    try {
+      const res = await fetch("/api/admin/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, instagram }),
+      });
+      if (!res.ok) throw new Error("Failed to join");
+      setWaitlistStatus("done");
+    } catch (err) {
+      alert("Error: " + err.message);
+      setWaitlistStatus("idle");
     }
   }
 
