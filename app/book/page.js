@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
-import { SIZES, TIERS, REMOVALS, DEPOSIT_AMOUNT, priceFor } from "@/lib/pricing";
+import { SIZES, TIERS, REMOVALS } from "@/lib/pricing";
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -104,9 +104,12 @@ export default function Book() {
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Open slots</h2>
             {eligibleSlots?.length === 0 ? (
-              <div className="rounded-2xl bg-stoneDeep/60 ring-1 p-6 text-center">
+              <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
                 {waitlistStatus === "done" ? (
-                  <p>You're on the list! ✿</p>
+                  <div className="py-4">
+                    <h3 className="font-display text-lg text-inkDeep mb-2">You're on the list! ✿</h3>
+                    <p className="text-sm text-ink/70">You've successfully joined the waitlist! If there are any spots that open up, I will contact you! Thank you so much for your support!!</p>
+                  </div>
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
                     <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
