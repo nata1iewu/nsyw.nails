@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { NextResponse } from "next/server";
-import { getSlots, setSlotStatus, addBooking } from "@/lib/kv";
+import { getSlots, setSlotStatus, addBooking, claimSlot, releaseSlotClaim } from "@/lib/kv";
 import { REMOVALS } from "@/lib/pricing";
 import { notifyOwner } from "@/lib/sms";
 
@@ -19,28 +19,45 @@ export async function POST(request) {
       { status: 409 }
     );
   }
-  // Hold the slot immediately so two people can't grab the same time.
-  await setSlotStatus(slotId, "held");
 
-  const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-
-  const booking = await addBooking({
-    slotId,
-    date: slot.date,
-    time: slot.time,
-    duration: slot.duration || 120,
-    name,
-    phone,
-    instagram,
-    removal: removal ? removal.label : "",
-  });
+  // Atomic claim — only one concurrent request can win this, even under heavy traffic.
+  const claimed = await claimSlot(slotId);
+  if (!claimed) {
+    return NextResponse.json(
+      { error: "That slot was just taken by someone else. Please pick another." },
+      { status: 409 }
+    );
+  }
 
   try {
-    await notifyOwner(
-      `New booking request: ${name} (${phone}, @${instagram.replace(/^@/, "")}) — ${slot.date} ${slot.time}${removal ? ` — ${removal.label}` : ""}. Approve in your admin page.`
-    );
-  } catch (e) {
-    console.error("SMS notify failed:", e);
+    await setSlotStatus(slotId, "held");
+
+    const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
+
+    const booking = await addBooking({
+      slotId,
+      date: slot.date,
+      time: slot.time,
+      duration: slot.duration || 120,
+      name,
+      phone,
+      instagram,
+      removal: removal ? removal.label : "",
+    });
+
+    try {
+      await notifyOwner(
+        `New booking request: ${name} (${phone}, @${instagram.replace(/^@/, "")}) — ${slot.date} ${slot.time}${removal ? ` — ${removal.label}` : ""}. Approve in your admin page.`
+      );
+    } catch (e) {
+      console.error("SMS notify failed:", e);
+    }
+
+    return NextResponse.json({ booking });
+  } catch (error) {
+    // Something failed after claiming — release the lock so the slot isn't stuck forever.
+    await releaseSlotClaim(slotId);
+    await setSlotStatus(slotId, "open");
+    return NextResponse.json({ error: "Booking failed. Please try again." }, { status: 500 });
   }
-  return NextResponse.json({ booking });
 }
