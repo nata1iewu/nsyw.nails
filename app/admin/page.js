@@ -7,6 +7,7 @@ export default function Admin() {
   const [waitlist, setWaitlist] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [duration, setDuration] = useState("120");
   const [bulkInput, setBulkInput] = useState("");
 
   async function fetchData() {
@@ -28,7 +29,7 @@ export default function Admin() {
     const res = await fetch("/api/admin/add-slot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: Date.now().toString(), date, time, status: "open" }),
+      body: JSON.stringify({ id: Date.now().toString(), date, time, duration: Number(duration), status: "open" }),
     });
     if (res.ok) {
       alert("Slot added successfully!");
@@ -40,19 +41,26 @@ export default function Admin() {
   }
 
   async function handleBulkAdd() {
-    // Expects input like: 2026-07-09, 10:00, 12:00, 14:00 (24-hour time)
-    const parts = bulkInput.split(',').map(p => p.trim());
-    if (parts.length < 2) return alert("Format: Date, Time1, Time2...");
+    // Each line: date, time, duration(optional, defaults to 120)
+    // e.g. 2026-07-09, 10:00, 180
+    const lines = bulkInput.split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length === 0) return alert("Enter at least one slot line.");
 
-    const dateStr = parts[0];
-    const timeSlots = parts.slice(1);
-
-    const newSlots = timeSlots.map(time => ({
-      id: Date.now().toString() + Math.random(),
-      date: dateStr,
-      time: time,
-      status: "open"
-    }));
+    const newSlots = [];
+    for (const line of lines) {
+      const parts = line.split(",").map(p => p.trim());
+      if (parts.length < 2) {
+        return alert(`Bad line (needs date, time): "${line}"`);
+      }
+      const [lineDate, lineTime, lineDuration] = parts;
+      newSlots.push({
+        id: Date.now().toString() + Math.random(),
+        date: lineDate,
+        time: lineTime,
+        duration: lineDuration ? Number(lineDuration) : 120,
+        status: "open",
+      });
+    }
 
     const res = await fetch("/api/admin/add-slot", {
       method: "POST",
@@ -61,9 +69,9 @@ export default function Admin() {
     });
 
     if (res.ok) {
-      alert("Slots added!");
-      setBulkInput(""); // Clear the input
-      fetchData(); // Refresh the list
+      alert(`${newSlots.length} slots added!`);
+      setBulkInput("");
+      fetchData();
     } else {
       alert("Failed to add slots.");
     }
@@ -91,7 +99,6 @@ export default function Admin() {
     <main className="max-w-3xl mx-auto p-10">
       <h1 className="text-3xl mb-10">Dashboard</h1>
 
-      {/* Container for all Admin Controls */}
       <div className="mb-10 p-6 border rounded-2xl">
 
         {/* Single Slot Add */}
@@ -99,28 +106,44 @@ export default function Admin() {
         <div className="flex gap-2 mb-8">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded" />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="p-2 border rounded" />
+          <select value={duration} onChange={(e) => setDuration(e.target.value)} className="p-2 border rounded">
+            <option value="120">2 hrs (standard)</option>
+            <option value="180">3 hrs (removal-eligible)</option>
+            <option value="240">4 hrs (removal-eligible)</option>
+          </select>
           <button onClick={handleAddSlot} className="bg-black text-white px-4 py-2 rounded">Add</button>
         </div>
 
         {/* Bulk Slot Add */}
         <h2 className="text-lg font-bold mb-2">Bulk Add Slots</h2>
-        <p className="text-xs text-gray-500 mb-2">Format: Date, Time, Time (e.g., 2026-07-09, 10:00, 14:00) — use 24-hour time</p>
-        <div className="flex gap-2">
-          <input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="2026-07-09, 10:00, 14:00" className="w-full p-2 border rounded" />
-          <button onClick={handleBulkAdd} className="bg-black text-white px-4 py-2 rounded">Bulk Add</button>
-        </div>
-      </div>
-      <button onClick={async () => {
-        if (confirm("Are you sure? This will delete ALL slots, including valid upcoming ones.")) {
-          const res = await fetch("/api/admin/add-slot", { method: "DELETE" });
-          if (res.ok) {
-            alert("All slots cleared.");
-            fetchData();
-          } else {
-            alert("Failed to clear slots.");
+        <p className="text-xs text-gray-500 mb-2">
+          One slot per line: date, time, duration (minutes, optional — defaults to 120). 180+ = removal-eligible.<br />
+          Example:<br />
+          2026-07-09, 10:00, 120<br />
+          2026-07-09, 14:00, 180<br />
+          2026-07-10, 09:00
+        </p>
+        <textarea
+          value={bulkInput}
+          onChange={(e) => setBulkInput(e.target.value)}
+          placeholder={"2026-07-09, 10:00, 120\n2026-07-09, 14:00, 180\n2026-07-10, 09:00"}
+          rows={6}
+          className="w-full p-2 border rounded font-mono text-sm mb-2"
+        />
+        <button onClick={handleBulkAdd} className="bg-black text-white px-4 py-2 rounded">Bulk Add</button>
+
+        <button onClick={async () => {
+          if (confirm("Are you sure? This will delete ALL slots, including valid upcoming ones.")) {
+            const res = await fetch("/api/admin/add-slot", { method: "DELETE" });
+            if (res.ok) {
+              alert("All slots cleared.");
+              fetchData();
+            } else {
+              alert("Failed to clear slots.");
+            }
           }
-        }
-      }} className="text-red-500 text-sm underline mt-3">Clear All Slots</button>
+        }} className="block text-red-500 text-sm underline mt-3">Clear All Slots</button>
+      </div>
 
       {/* Waitlist Section */}
       <div>
