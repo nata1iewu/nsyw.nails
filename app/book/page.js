@@ -63,16 +63,17 @@ export default function Book() {
   }
 
   async function handleWaitlistSubmit() {
-    if (!name || !phone || !instagram) {
-      alert("Please fill in all fields!");
+    if (!name || !phone || !instagram || !removalId) {
+      alert("Please fill in all fields, including a removal option!");
       return;
     }
     setWaitlistStatus("submitting");
     try {
+      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
       const res = await fetch("/api/admin/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, instagram }),
+        body: JSON.stringify({ name, phone, instagram, removal: removal ? removal.label : "None needed" }),
       });
       if (!res.ok) throw new Error("Failed to join");
       setWaitlistStatus("done");
@@ -100,7 +101,8 @@ export default function Book() {
           </div>
 
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Removal</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Removal</h2>
+            <p className="text-sm text-ink/60 mb-4">Please note: I do not perform foreign removals (nails done elsewhere).</p>
             <div className="grid gap-2 sm:grid-cols-3">
               <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
               {REMOVALS.map((r) => (

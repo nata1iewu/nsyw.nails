@@ -207,7 +207,7 @@ export default function Admin() {
         </div>
         {waitlist.map((w, i) => (
           <div key={i} className="py-2 border-b">
-            {w.name} - {w.phone} {w.instagram ? `- ${w.instagram}` : ""}
+            {w.name} - {w.phone} {w.instagram ? `- ${w.instagram}` : ""} {w.removal ? `- ${w.removal}` : ""}
           </div>
         ))}
       </div>
