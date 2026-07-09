@@ -102,7 +102,7 @@ export default function Book() {
 
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Removal</h2>
-            <p className="text-sm text-ink/60 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS (please do not select a removal option if you got your nails done elsewhere).</p>
+            <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
             <div className="grid gap-2 sm:grid-cols-3">
               <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
               {REMOVALS.map((r) => (
