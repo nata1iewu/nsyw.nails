@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
 import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE } from "@/lib/pricing";
 
-export const metadata = { title: "Services & Pricing — Nat W Nails" };
+export const metadata = { title: "Services & Pricing — nsywnails" };
 
 export default function Services() {
   return (
