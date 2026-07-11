@@ -38,7 +38,7 @@ export default function Home() {
                   <div className="flex flex-wrap justify-center items-center gap-4 sm:contents">
                     <Link
                       href="/book"
-                      className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-ink/60"
+                      className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-clay"
                     >
                       See open slots
                     </Link>
@@ -51,7 +51,7 @@ export default function Home() {
                   </div>
                   <Link
                     href="/showcase"
-                    className="rounded-full bg-umber px-7 py-3 font-body text-mist transition hover:bg-ink/60"
+                    className="rounded-full bg-umber px-7 py-3 font-body text-mist transition hover:bg-clay"
                   >
                     Check out some of my work!
                   </Link>
