@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -30,6 +30,11 @@ export default function Book() {
   const [instagram, setInstagram] = useState("");
   const [status, setStatus] = useState("idle");
   const [waitlistStatus, setWaitlistStatus] = useState("idle");
+  const [formError, setFormError] = useState("");
+  const [waitlistError, setWaitlistError] = useState("");
+
+  const phoneRef = useRef(null);
+  const instagramRef = useRef(null);
 
   useEffect(() => {
     fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
@@ -42,21 +47,43 @@ export default function Book() {
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 
+  function handleNameKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      phoneRef.current?.focus();
+    }
+  }
+
+  function handlePhoneKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      instagramRef.current?.focus();
+    }
+  }
+
+  function handleInstagramKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      instagramRef.current?.blur();
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
+    setFormError("");
     const missing = [];
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
-        alert("Currently fully booked! Feel free to join the waitlist !! ♡");
+        setFormError("Currently fully booked! Feel free to join the waitlist !! ♡");
         return;
       }
       missing.push("a time slot");
     }
     if (missing.length > 0) {
-      alert(`Please fill in: ${missing.join(", ")}`);
+      setFormError(`Please fill in: ${missing.join(", ")}`);
       return;
     }
     setStatus("submitting");
@@ -80,13 +107,19 @@ export default function Book() {
       router.push(`/book/confirmed?${params.toString()}`);
     } catch (err) {
       setStatus("error");
-      alert(err.message);
+      setFormError(err.message);
     }
   }
 
   async function handleWaitlistSubmit() {
-    if (!name || !phone || !instagram || !removalChosen) {
-      alert("Please fill in all fields, including a removal option!");
+    setWaitlistError("");
+    const missing = [];
+    if (!name) missing.push("Name");
+    if (!phone) missing.push("Phone");
+    if (!instagram) missing.push("Instagram");
+    if (!removalChosen) missing.push("a removal option");
+    if (missing.length > 0) {
+      setWaitlistError(`Please fill in: ${missing.join(", ")}`);
       return;
     }
     setWaitlistStatus("submitting");
@@ -100,7 +133,7 @@ export default function Book() {
       if (!res.ok) throw new Error("Failed to join");
       setWaitlistStatus("done");
     } catch (err) {
-      alert("Error: " + err.message);
+      setWaitlistError("Error: " + err.message);
       setWaitlistStatus("idle");
     }
   }
@@ -116,9 +149,30 @@ export default function Book() {
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Your info</h2>
             <div className="grid gap-3 max-w-md">
-              <input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
-              <input required type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
-              <input required placeholder="Instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none" />
+              <input
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={handleNameKeyDown}
+                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+              />
+              <input
+                ref={phoneRef}
+                type="tel"
+                placeholder="Phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                onKeyDown={handlePhoneKeyDown}
+                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+              />
+              <input
+                ref={instagramRef}
+                placeholder="Instagram"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                onKeyDown={handleInstagramKeyDown}
+                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+              />
             </div>
           </div>
 
@@ -149,6 +203,9 @@ export default function Book() {
                     <p className="font-display text-base text-inkDeep mb-1">
                       Currently fully booked! Follow @nsywnails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
                     </p>
+                    {waitlistError && (
+                      <p className="text-sm text-red-600 font-medium">{waitlistError}</p>
+                    )}
                     <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-mist">
                       {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
                     </button>
@@ -165,6 +222,10 @@ export default function Book() {
               </div>
             )}
           </div>
+
+          {formError && (
+            <p className="text-sm text-red-600 font-medium text-center">{formError}</p>
+          )}
 
           <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
             {status === "submitting" ? "Sending..." : "Book Now"}
