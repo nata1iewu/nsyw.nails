@@ -37,15 +37,16 @@ export default function Footer() {
           </div>
         </div>
         <div>
+          <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Questions?</p>
+          <p>Feel free to message me on Instagram!</p>
+        </div>
+        <div>
           <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Before you book</p>
           <Link href="/policies" className="hover:text-inkDeep transition">
             Read studio policies →
           </Link>
         </div>
-        <div>
-          <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Questions?</p>
-          <p>Feel free to message me on Instagram!</p>
-        </div>
+
       </div >
     </footer >
   );
