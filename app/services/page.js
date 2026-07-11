@@ -74,7 +74,7 @@ export default function Services() {
               <p className="font-script text-3xl text-umber mb-1">Tier {tier.label}</p>
               {tier.placeholder && (
                 <p className="text-sm text-ink/45 mb-3">
-                  Placeholder photos — swap these for real examples in{" "}
+                  need to add pics lol {" "}
                   <code className="text-ink/60">public/images/gallery/</code>.
                 </p>
               )}

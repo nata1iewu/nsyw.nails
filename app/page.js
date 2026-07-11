@@ -34,8 +34,8 @@ export default function Home() {
                   offer Gel-X and specialize in intricate nail art with a love for asian-style
                   designs! Thank you for visiting my site!!
                 </p>
-                <div className="mt-9 inline-flex flex-col items-center gap-4 sm:flex sm:flex-row sm:flex-wrap sm:items-center">
-                  <div className="flex flex-wrap items-center gap-4 sm:contents">
+                <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex flex-wrap justify-center items-center gap-4 sm:contents">
                     <Link
                       href="/book"
                       className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-umber"
@@ -51,7 +51,7 @@ export default function Home() {
                   </div>
                   <Link
                     href="/showcase"
-                    className="rounded-full bg-ink px-7 py-3 font-body text-mist transition hover:bg-inkDeep"
+                    className="rounded-full bg-ink/70 px-7 py-3 font-body text-mist transition hover:bg-inkDeep"
                   >
                     Check out some of my work!
                   </Link>
