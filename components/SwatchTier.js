@@ -5,9 +5,16 @@ export default function SwatchTier({ tier, selected = false, onClick, interactiv
     <>
       <span
         aria-hidden
-        className="block h-16 w-12 rounded-nail shadow-sm ring-1 ring-black/10"
+        className="relative block h-16 w-12 rounded-nail shadow-md ring-1 ring-black/10 overflow-hidden"
         style={{ background: tier.swatch }}
-      />
+      >
+        <span
+          className="pointer-events-none absolute inset-0 rounded-nail"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 30%, rgba(255,255,255,0) 55%)",
+          }}
+        />
+      </span>
       <span className="text-center">
         <span className="block font-display text-sm uppercase tracking-[0.15em] text-ink/50">
           Tier
