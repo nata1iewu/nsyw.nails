@@ -95,7 +95,7 @@ export default function Services() {
           <h2 className="font-display text-xl italic text-inkDeep mb-3">Booking policy</h2>
           <ul className="space-y-2 text-base text-ink/75 list-disc pl-5">
             <li>Appointment Only</li>
-            <li>New slots are posted monthly on a first-come, first-served basis.</li>
+            <li>New slots are posted monthly on a first-come, first-serve basis.</li>
             <li>$5 deposit via Zelle required to hold your slot.</li>
             <li>Your request is confirmed once it's manually approved.</li>
             <li>{LOYALTY_NOTE}</li>
