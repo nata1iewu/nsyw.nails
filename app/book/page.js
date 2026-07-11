@@ -48,7 +48,13 @@ export default function Book() {
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
-    if (!slotId) missing.push("a time slot");
+    if (!slotId) {
+      if (eligibleSlots?.length === 0) {
+        alert("Currently fully booked! Feel free to join the waitlist !! ♡");
+        return;
+      }
+      missing.push("a time slot");
+    }
     if (missing.length > 0) {
       alert(`Please fill in: ${missing.join(", ")}`);
       return;

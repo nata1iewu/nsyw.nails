@@ -51,7 +51,7 @@ export default function Home() {
                   </div>
                   <Link
                     href="/showcase"
-                    className="rounded-full bg-ink/70 px-7 py-3 font-body text-mist transition hover:bg-inkDeep"
+                    className="rounded-full bg-ink/70 px-7 py-3 font-body text-mist transition hover:bg-umber"
                   >
                     Check out some of my work!
                   </Link>
