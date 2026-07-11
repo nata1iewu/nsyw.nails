@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { REMOVALS } from "@/lib/pricing";
@@ -18,6 +19,7 @@ function formatTime(timeStr) {
 }
 
 export default function Book() {
+  const router = useRouter();
   const [hasMounted, setHasMounted] = useState(false);
   const [slots, setSlots] = useState(null);
   const [slotId, setSlotId] = useState("");
@@ -62,7 +64,14 @@ export default function Book() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Booking failed");
       }
-      setStatus("done");
+
+      const slot = slots.find((s) => s.id === slotId);
+      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
+      const when = slot ? `${formatDate(slot.date)} at ${formatTime(slot.time)}` : "";
+      const removalLabel = removal ? removal.label : "no removal";
+
+      const params = new URLSearchParams({ when, removal: removalLabel });
+      router.push(`/book/confirmed?${params.toString()}`);
     } catch (err) {
       setStatus("error");
       alert(err.message);
@@ -151,16 +160,9 @@ export default function Book() {
             )}
           </div>
 
-          {status === "done" ? (
-            <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
-              <h3 className="font-display text-lg text-inkDeep mb-2">Successfully booked! ✿</h3>
-              <p className="text-sm text-ink/70">Thank you! I've received your booking and will confirm with you shortly via text or Instagram. A $5 deposit is required but DO NOT send it until I message you! Please keep a look out!</p>
-            </div>
-          ) : (
-            <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
-              {status === "submitting" ? "Sending..." : "Book Now"}
-            </button>
-          )}
+          <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
+            {status === "submitting" ? "Sending..." : "Book Now"}
+          </button>
         </form>
       </main>
       <Footer />
