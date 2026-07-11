@@ -1,18 +1,8 @@
-export default function SwatchTier({ tier, selected = false, onClick, interactive = false }) {
-  const Comp = interactive ? "button" : "div";
+import Link from "next/link";
 
-  return (
-    <Comp
-      type={interactive ? "button" : undefined}
-      onClick={onClick}
-      className={`group flex flex-col items-center gap-3 rounded-2xl p-4 text-left transition ${interactive ? "cursor-pointer" : ""
-        } ${selected
-          ? "bg-mist ring-2 ring-inkDeep"
-          : interactive
-            ? "hover:bg-mist/70 ring-1 ring-line"
-            : ""
-        }`}
-    >
+export default function SwatchTier({ tier, selected = false, onClick, interactive = false, href }) {
+  const content = (
+    <>
       <span
         aria-hidden
         className="block h-16 w-12 rounded-nail shadow-sm ring-1 ring-black/10"
@@ -28,6 +18,29 @@ export default function SwatchTier({ tier, selected = false, onClick, interactiv
           {tier.add === 0 ? "included" : `+$${tier.add}`}
         </span>
       </span>
+    </>
+  );
+
+  const className = `group flex flex-col items-center gap-3 rounded-2xl p-4 text-left transition ${interactive || href ? "cursor-pointer" : ""
+    } ${selected
+      ? "bg-mist ring-2 ring-inkDeep"
+      : interactive || href
+        ? "hover:bg-mist/70 ring-1 ring-line"
+        : ""
+    }`;
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  const Comp = interactive ? "button" : "div";
+  return (
+    <Comp type={interactive ? "button" : undefined} onClick={onClick} className={className}>
+      {content}
     </Comp>
   );
 }

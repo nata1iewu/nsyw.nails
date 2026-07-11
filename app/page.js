@@ -85,7 +85,7 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {TIERS.map((tier) => (
-                <SwatchTier key={tier.id} tier={tier} />
+                <SwatchTier key={tier.id} tier={tier} href={`/tiers/${tier.id}`} />
               ))}
             </div>
           </div>

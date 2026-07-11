@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import SwatchTier from "@/components/SwatchTier";
 import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE } from "@/lib/pricing";
 
 export const metadata = { title: "Services & Pricing — nsywnails" };
@@ -57,12 +56,21 @@ export default function Services() {
         </section>
 
         {/* Tier pricing + galleries */}
+        {/* Tier pricing + galleries */}
         <section className="mb-16">
           <h2 className="font-display text-xl italic text-inkDeep mb-2">Design tiers</h2>
           <p className="text-base text-ink/60 mb-6">Added on top of your base length price.</p>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 mb-10">
+          <div className="divide-y divide-line/70 rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60 mb-10">
             {TIERS.map((tier) => (
-              <SwatchTier key={tier.id} tier={tier} />
+              <div key={tier.id} className="flex items-center justify-between px-6 py-4">
+                <div>
+                  <span className="font-body text-ink">Tier {tier.label}</span>
+                  <span className="block text-sm text-ink/50">{tier.desc}</span>
+                </div>
+                <span className="font-display text-lg text-umber">
+                  {tier.add === 0 ? "included" : `+$${tier.add}`}
+                </span>
+              </div>
             ))}
           </div>
           <p className="mb-10 text-sm text-ink/50">
