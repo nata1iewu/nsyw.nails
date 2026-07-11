@@ -31,6 +31,7 @@ export default function Book() {
   const [status, setStatus] = useState("idle");
   const [waitlistStatus, setWaitlistStatus] = useState("idle");
   const [formError, setFormError] = useState("");
+  const [formNotice, setFormNotice] = useState("");
   const [waitlistError, setWaitlistError] = useState("");
 
   const phoneRef = useRef(null);
@@ -71,13 +72,14 @@ export default function Book() {
   async function handleSubmit(e) {
     e.preventDefault();
     setFormError("");
+    setFormNotice("");
     const missing = [];
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
-        setFormError("Currently fully booked! Feel free to join the waitlist !! ♡");
+        setFormNotice("Currently fully booked! Feel free to join the waitlist !! ♡");
         return;
       }
       missing.push("a time slot");
@@ -225,6 +227,9 @@ export default function Book() {
 
           {formError && (
             <p className="text-sm text-red-600 font-medium text-center">{formError}</p>
+          )}
+          {formNotice && (
+            <p className="text-sm text-umber font-medium text-center">{formNotice}</p>
           )}
 
           <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
