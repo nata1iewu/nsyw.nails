@@ -49,7 +49,7 @@ export default function Home() {
                   </Link>
                   <Link
                     href="/showcase"
-                    className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+                    className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-umber"
                   >
                     Check out some of my work!
                   </Link>
