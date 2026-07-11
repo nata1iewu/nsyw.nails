@@ -40,8 +40,6 @@ export default function Book() {
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 
-  const canSubmit = slotId && name && phone && instagram;
-
   async function handleSubmit(e) {
     e.preventDefault();
     const missing = [];
