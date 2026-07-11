@@ -47,6 +47,12 @@ export default function Home() {
                   >
                     View pricing
                   </Link>
+                  <Link
+                    href="/showcase"
+                    className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+                  >
+                    Check out some of my work!
+                  </Link>
                 </div>
               </div>
 
