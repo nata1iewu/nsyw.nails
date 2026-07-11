@@ -34,22 +34,24 @@ export default function Home() {
                   offer Gel-X and specialize in intricate nail art with a love for asian-style
                   designs! Thank you for visiting my site!!
                 </p>
-                <div className="mt-9 flex flex-wrap items-center gap-4">
-                  <Link
-                    href="/book"
-                    className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-umber"
-                  >
-                    See open slots
-                  </Link>
-                  <Link
-                    href="/services"
-                    className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
-                  >
-                    View pricing
-                  </Link>
+                <div className="mt-9 flex flex-col items-center gap-4">
+                  <div className="flex flex-wrap justify-center items-center gap-4">
+                    <Link
+                      href="/book"
+                      className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-umber"
+                    >
+                      See open slots
+                    </Link>
+                    <Link
+                      href="/services"
+                      className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+                    >
+                      View pricing
+                    </Link>
+                  </div>
                   <Link
                     href="/showcase"
-                    className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-umber"
+                    className="rounded-full bg-clay px-7 py-3 font-body text-mist transition hover:bg-umber"
                   >
                     Check out some of my work!
                   </Link>
