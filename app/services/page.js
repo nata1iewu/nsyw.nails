@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -77,33 +77,17 @@ export default function Services() {
             Tier 4 starts at +$15 — For more intricate and complicated designs
           </p>
 
-          {TIERS.filter((t) => t.gallery).map((tier) => (
-            <div key={tier.id} className="mb-10">
-              <p className="font-script text-3xl text-umber mb-1">Tier {tier.label}</p>
-              {tier.placeholder && (
-                <p className="text-sm text-ink/45 mb-3">
-                  need to add pics lol {" "}
-                  <code className="text-ink/60">public/images/gallery/</code>.
-                </p>
-              )}
-              <div className={`grid grid-cols-2 gap-3 sm:grid-cols-4 ${!tier.placeholder ? "mt-3" : ""}`}>
-                {tier.gallery.map((src, i) => (
-                  <div
-                    key={`${src}-${i}`}
-                    className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-line/70"
-                  >
-                    <Image
-                      src={`/images/gallery/${src}`}
-                      alt={`Tier ${tier.label} nail set example`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, 25vw"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="flex flex-wrap gap-3">
+            {TIERS.map((tier) => (
+              <Link
+                key={tier.id}
+                href={`/tiers/${tier.id}`}
+                className="rounded-full px-6 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+              >
+                See Tier {tier.label} examples →
+              </Link>
+            ))}
+          </div>
         </section>
 
         {/* Loyalty + policy */}
