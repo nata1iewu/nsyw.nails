@@ -1,11 +1,14 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { NextResponse } from "next/server";
+import { checkPassword, sessionCookieHeader } from "@/lib/auth";
 
 export async function POST(request) {
   const { password } = await request.json();
-  if (password !== process.env.ADMIN_PASSWORD) {
+  if (!checkPassword(password)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  res.headers.set("Set-Cookie", sessionCookieHeader());
+  return res;
 }

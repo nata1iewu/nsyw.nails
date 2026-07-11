@@ -22,6 +22,7 @@ export default function Book() {
   const [slots, setSlots] = useState(null);
   const [slotId, setSlotId] = useState("");
   const [removalId, setRemovalId] = useState("");
+  const [removalChosen, setRemovalChosen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -43,7 +44,15 @@ export default function Book() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!canSubmit) return;
+    const missing = [];
+    if (!name) missing.push("Name");
+    if (!phone) missing.push("Phone");
+    if (!instagram) missing.push("Instagram");
+    if (!slotId) missing.push("a time slot");
+    if (missing.length > 0) {
+      alert(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
     setStatus("submitting");
     try {
       const res = await fetch("/api/book", {
@@ -63,7 +72,7 @@ export default function Book() {
   }
 
   async function handleWaitlistSubmit() {
-    if (!name || !phone || !instagram || !removalId) {
+    if (!name || !phone || !instagram || !removalChosen) {
       alert("Please fill in all fields, including a removal option!");
       return;
     }
@@ -104,9 +113,9 @@ export default function Book() {
             <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Removal</h2>
             <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
             <div className="grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => setRemovalId("")} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
+              <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
               {REMOVALS.map((r) => (
-                <button type="button" key={r.id} onClick={() => setRemovalId(r.id)} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
+                <button type="button" key={r.id} onClick={() => { setRemovalId(r.id); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
                   {r.label} +${r.price}
                 </button>
               ))}

@@ -17,11 +17,17 @@ export default function Admin() {
       if (res.ok) {
         const data = await res.json();
         setWaitlist(data.waitlist || []);
+      } else if (res.status === 401) {
+        alert("Session expired — please log in again.");
+        setAuthed(false);
       }
       const bookingsRes = await fetch("/api/admin/bookings");
       if (bookingsRes.ok) {
         const data = await bookingsRes.json();
         setBookings(data.bookings || []);
+      } else if (bookingsRes.status === 401) {
+        alert("Session expired — please log in again.");
+        setAuthed(false);
       }
     } catch (e) { console.error("Error loading data", e); }
   }
@@ -115,6 +121,9 @@ export default function Admin() {
   return (
     <main className="max-w-3xl mx-auto p-10">
       <h1 className="text-3xl mb-10">Dashboard</h1>
+      <button onClick={fetchData} className="mb-8 text-sm underline text-inkDeep">
+        ↻ Refresh bookings & waitlist
+      </button>
 
       <div className="mb-10 p-6 border rounded-2xl">
 
