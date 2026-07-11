@@ -3,6 +3,7 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
+import Botanical from "@/components/Botanical";
 import { TIERS, LOYALTY_NOTE } from "@/lib/pricing";
 
 export default function Home() {
@@ -13,6 +14,11 @@ export default function Home() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
+          <Botanical className="pointer-events-none absolute -top-6 -left-10 h-64 w-64 text-ink/25 sm:h-80 sm:w-80" />
+          <Botanical
+            flip
+            className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 text-ink/20 sm:h-80 sm:w-80"
+          />
           <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
             <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
               {/* Text */}
@@ -34,8 +40,8 @@ export default function Home() {
                   offer Gel-X and specialize in intricate nail art with a love for asian-style
                   designs! Thank you for visiting my site!!
                 </p>
-                <div className="mt-9 flex flex-col items-center gap-4">
-                  <div className="flex flex-wrap justify-center items-center gap-4">
+                <div className="mt-9 flex w-full flex-col items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
                     <Link
                       href="/book"
                       className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-umber"
@@ -51,7 +57,7 @@ export default function Home() {
                   </div>
                   <Link
                     href="/showcase"
-                    className="rounded-full bg-clay px-7 py-3 font-body text-mist transition hover:bg-umber"
+                    className="rounded-full bg-umber px-7 py-3 font-body text-mist transition hover:bg-inkDeep"
                   >
                     Check out some of my work!
                   </Link>
@@ -92,7 +98,7 @@ export default function Home() {
         </section>
 
         {/* Policy strip */}
-        <section className="mx-auto max-w-5xl px-6 py-6 grid gap-6 sm:grid-cols-4">
+        <section className="mx-auto max-w-5xl px-6 py-8 grid gap-10 sm:grid-cols-4">
           <div>
             <p className="font-display text-lg text-inkDeep mb-1">Appointment only</p>
             <p className="text-base text-ink/70">All bookings go through the site!</p>
