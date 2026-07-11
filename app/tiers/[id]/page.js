@@ -4,6 +4,8 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TIER_EXAMPLES } from "@/lib/tierExamples";
 
+const TIER_ORDER = ["tier1", "tier2", "tier3", "tier4"];
+
 export default function TierExamplePage({ params }) {
     const tier = TIER_EXAMPLES[params.id];
 
@@ -21,6 +23,10 @@ export default function TierExamplePage({ params }) {
             </>
         );
     }
+
+    const currentIndex = TIER_ORDER.indexOf(params.id);
+    const prevId = currentIndex > 0 ? TIER_ORDER[currentIndex - 1] : null;
+    const nextId = currentIndex < TIER_ORDER.length - 1 ? TIER_ORDER[currentIndex + 1] : null;
 
     return (
         <>
@@ -50,12 +56,28 @@ export default function TierExamplePage({ params }) {
                     </div>
                 )}
 
-                <Link
-                    href="/book"
-                    className="mt-10 inline-block rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-umber"
-                >
-                    See open slots
-                </Link>
+                <div className="mt-10 flex items-center justify-between">
+                    {prevId ? (
+                        <Link
+                            href={`/tiers/${prevId}`}
+                            className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+                        >
+                            ← Tier {TIER_EXAMPLES[prevId].label}
+                        </Link>
+                    ) : (
+                        <span />
+                    )}
+                    {nextId ? (
+                        <Link
+                            href={`/tiers/${nextId}`}
+                            className="inline-flex items-center gap-2 rounded-full bg-inkDeep px-6 py-3 font-body text-mist transition hover:bg-umber"
+                        >
+                            Tier {TIER_EXAMPLES[nextId].label} →
+                        </Link>
+                    ) : (
+                        <span />
+                    )}
+                </div>
             </main>
             <Footer />
         </>
