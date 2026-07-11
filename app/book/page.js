@@ -157,7 +157,7 @@ export default function Book() {
               <p className="text-sm text-ink/70">Thank you! I've received your booking and will confirm with you shortly via text or Instagram. A $5 deposit is required but DO NOT send it until I message you! Please keep a look out!</p>
             </div>
           ) : (
-            <button type="submit" disabled={!canSubmit || status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
+            <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
               {status === "submitting" ? "Sending..." : "Book Now"}
             </button>
           )}
