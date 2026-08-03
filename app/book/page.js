@@ -75,7 +75,6 @@ export default function Book() {
     setFormError("");
     setFormNotice("");
     const missing = [];
-    const missing = [];
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
