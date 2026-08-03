@@ -191,7 +191,7 @@ export default function Admin() {
             <div key={b.id} className="py-3 border-b">
               <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
               <div className="text-sm text-gray-600 mb-2">
-                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · <span className="uppercase">{b.status}</span>
+                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · {b.isStudent ? "Student rate" : "Regular rate"} · <span className="uppercase">{b.status}</span>
               </div>
               {b.status === "pending" && (
                 <div className="flex gap-2">

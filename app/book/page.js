@@ -33,6 +33,7 @@ export default function Book() {
   const [formError, setFormError] = useState("");
   const [formNotice, setFormNotice] = useState("");
   const [waitlistError, setWaitlistError] = useState("");
+  const [isStudent, setIsStudent] = useState(null);
 
   const phoneRef = useRef(null);
   const instagramRef = useRef(null);
@@ -74,9 +75,11 @@ export default function Book() {
     setFormError("");
     setFormNotice("");
     const missing = [];
+    const missing = [];
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
+    if (isStudent === null) missing.push("student status");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
         setFormNotice("Currently fully booked! Feel free to join the waitlist !! ♡");
@@ -93,7 +96,7 @@ export default function Book() {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram }),
+        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, isStudent }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -177,9 +180,21 @@ export default function Book() {
               />
             </div>
           </div>
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Student status</h2>
+            <p className="text-sm text-ink/60 mb-4">Student pricing is self-reported and requires a valid student status.</p>
+            <div className="grid grid-cols-2 gap-3 max-w-md">
+              <button type="button" onClick={() => setIsStudent(true)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === true ? "bg-mist ring-inkDeep" : "ring-line"}`}>
+                Yes, I'm a student
+              </button>
+              <button type="button" onClick={() => setIsStudent(false)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === false ? "bg-mist ring-inkDeep" : "ring-line"}`}>
+                No, regular rate
+              </button>
+            </div>
+          </div>
 
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Removal</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-2">3. Removal</h2>
             <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
             <div className="grid gap-2 sm:grid-cols-3">
               <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
@@ -192,7 +207,7 @@ export default function Book() {
           </div>
 
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Open slots</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Open slots</h2>
             {eligibleSlots?.length === 0 ? (
               <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
                 {waitlistStatus === "done" ? (

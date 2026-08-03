@@ -43,6 +43,7 @@ export async function POST(request) {
       phone,
       instagram,
       removal: removal ? removal.label : "",
+      isStudent: !!isStudent,
     });
 
     try {

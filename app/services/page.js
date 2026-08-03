@@ -27,12 +27,23 @@ export default function Services() {
 
         {/* Length pricing */}
         <section className="mb-14">
-          <h2 className="font-display text-xl italic text-inkDeep mb-5">By length</h2>
-          <div className="divide-y divide-line/70 rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
+          <h2 className="font-display text-xl italic text-inkDeep mb-2">By length</h2>
+          <p className="text-sm text-ink/60 mb-5">Student pricing requires a valid student status. Non-student pricing applies otherwise.</p>
+          <div className="rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-line/70">
+              <span className="text-sm uppercase tracking-[0.15em] text-ink/50">Length</span>
+              <div className="flex gap-8">
+                <span className="text-sm uppercase tracking-[0.15em] text-ink/50 w-16 text-right">Student</span>
+                <span className="text-sm uppercase tracking-[0.15em] text-ink/50 w-16 text-right">Regular</span>
+              </div>
+            </div>
             {SIZES.map((s) => (
-              <div key={s.id} className="flex items-center justify-between px-6 py-4">
+              <div key={s.id} className="flex items-center justify-between px-6 py-4 border-b border-line/70 last:border-b-0">
                 <span className="font-body text-ink">{s.label}</span>
-                <span className="font-display text-lg text-umber">${s.price}</span>
+                <div className="flex gap-8">
+                  <span className="font-display text-lg text-umber w-16 text-right">${s.price}</span>
+                  <span className="font-display text-lg text-ink/60 w-16 text-right">${s.nonStudentPrice}</span>
+                </div>
               </div>
             ))}
           </div>
