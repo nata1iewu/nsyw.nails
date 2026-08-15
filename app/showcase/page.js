@@ -37,7 +37,7 @@ export default function Showcase() {
                 <p className="text-base text-ink/70 mb-10">
                     For more pictures, check out my Instagram{" "}
                     <a
-                        href="https://instagram.com/nsywnails"
+                        href="https://instagram.com/nailsbynatwu"
                         target="_blank"
                         rel="noreferrer"
                         className="text-umber underline hover:text-inkDeep"

@@ -4,7 +4,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE } from "@/lib/pricing";
 
-export const metadata = { title: "Services & Pricing — nsywnails" };
+export const metadata = { title: "Services & Pricing — nailsbynatwu" };
 
 export default function Services() {
   return (
@@ -21,7 +21,7 @@ export default function Services() {
           tier that matches how detailed you want the set.
         </p>
         <p className="text-base text-ink/60 mb-14">
-          {DEPOSIT_NOTE} DM @nsywnails for a price quote if you're not sure where your inspo
+          {DEPOSIT_NOTE} DM @nailsbynatwu for a price quote if you're not sure where your inspo
           falls!
         </p>
 
