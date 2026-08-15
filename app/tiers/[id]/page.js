@@ -16,6 +16,7 @@ export default async function TierExamplePage({ params }) {
                 <Nav />
                 <main className="mx-auto max-w-3xl px-6 pt-16 pb-24 text-center">
                     <p className="text-ink/60">No examples found for this tier yet.</p>
+                    <p className="text-xs text-red-500 mt-4">DEBUG: id = "{id}" | available keys = {Object.keys(TIER_EXAMPLES).join(", ")}</p>
                     <Link href="/" className="mt-4 inline-block text-umber underline">
                         Back home
                     </Link>
@@ -24,7 +25,6 @@ export default async function TierExamplePage({ params }) {
             </>
         );
     }
-
     const currentIndex = TIER_ORDER.indexOf(id);
     const prevId = currentIndex > 0 ? TIER_ORDER[currentIndex - 1] : null;
     const nextId = currentIndex < TIER_ORDER.length - 1 ? TIER_ORDER[currentIndex + 1] : null;
