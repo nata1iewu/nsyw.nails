@@ -217,7 +217,7 @@ export default function Book() {
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
                     <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nsywnails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
+                      Currently fully booked! Follow @nailsbynatwu on Instagram for availability updates! In the meantime, feel free to join the waitlist!
                     </p>
                     {waitlistError && (
                       <p className="text-sm text-red-600 font-medium">{waitlistError}</p>

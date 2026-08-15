@@ -22,7 +22,7 @@ const body = EB_Garamond({
 });
 
 export const metadata = {
-  title: "nsywnails — your UCSD nail tech",
+  title: "nailsbynatwu — your UCSD nail tech",
   description:
     "Gel-X manicures with a specialization in intricate art, based on campus at UCSD and in Los Angeles, California outside of the active school year! Book with me now! — @nsyw.nails.",
 };

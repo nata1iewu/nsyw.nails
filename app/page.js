@@ -63,7 +63,7 @@ export default function Home() {
                 <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] ring-1 ring-line/70 shadow-sm">
                   <Image
                     src="/images/hero.jpg"
-                    alt="Natalie, nail tech at nsyw.nails"
+                    alt="Natalie, nail tech at uscd"
                     fill
                     priority
                     className="object-cover"

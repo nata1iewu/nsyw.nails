@@ -10,7 +10,7 @@ export default function Nav() {
     <header className="sticky top-0 z-40 border-b border-line/70 bg-stone/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <Link href="/" className="font-display text-xl tracking-tight text-inkDeep" onClick={() => setOpen(false)}>
-          <span className="font-script text-4xl align-middle text-umber">nsywnails</span>
+          <span className="font-script text-4xl align-middle text-umber">nailsbynatwu</span>
         </Link>
 
         {/* Desktop nav */}

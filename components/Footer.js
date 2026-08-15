@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="flex flex-col">
           <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Find me</p>
           <div className="flex items-center gap-3">
-            <a href="https://instagram.com/nsywnails" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-ink/75 hover:text-inkDeep transition">
+            <a href="https://instagram.com/nailsbynatwu" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-ink/75 hover:text-inkDeep transition">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <circle cx="12" cy="12" r="4" />
