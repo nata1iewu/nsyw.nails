@@ -6,8 +6,9 @@ import { TIER_EXAMPLES } from "@/lib/tierExamples";
 
 const TIER_ORDER = ["tier1", "tier2", "tier3", "tier4"];
 
-export default function TierExamplePage({ params }) {
-    const tier = TIER_EXAMPLES[params.id];
+export default async function TierExamplePage({ params }) {
+    const { id } = await params;
+    const tier = TIER_EXAMPLES[id];
 
     if (!tier) {
         return (
@@ -24,7 +25,7 @@ export default function TierExamplePage({ params }) {
         );
     }
 
-    const currentIndex = TIER_ORDER.indexOf(params.id);
+    const currentIndex = TIER_ORDER.indexOf(id);
     const prevId = currentIndex > 0 ? TIER_ORDER[currentIndex - 1] : null;
     const nextId = currentIndex < TIER_ORDER.length - 1 ? TIER_ORDER[currentIndex + 1] : null;
 

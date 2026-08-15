@@ -102,7 +102,7 @@ export default function Home() {
             <p className="text-base text-ink/70">
               New availability is posted each month!
               All updates are posted on instagram
-              @nsywnails.
+              @nailsbynatwu.
             </p>
           </div>
           <div>
