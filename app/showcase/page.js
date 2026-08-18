@@ -42,7 +42,7 @@ export default function Showcase() {
                         rel="noreferrer"
                         className="text-umber underline hover:text-inkDeep"
                     >
-                        @nsywnails
+                        @nailsbynatwu
                     </a>
                 </p>
 
