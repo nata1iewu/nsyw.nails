@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { REMOVALS } from "@/lib/pricing";
+import SwatchTier from "@/components/SwatchTier";
+import Calendar from "@/components/Calendar";
+import { SIZES, TIERS, REMOVALS, DEPOSIT_AMOUNT, priceFor } from "@/lib/pricing";
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -19,236 +20,323 @@ function formatTime(timeStr) {
 }
 
 export default function Book() {
-  const router = useRouter();
-  const [hasMounted, setHasMounted] = useState(false);
   const [slots, setSlots] = useState(null);
+  const [selectedDate, setSelectedDate] = useState("");
   const [slotId, setSlotId] = useState("");
+  const [sizeId, setSizeId] = useState("");
+  const [tierId, setTierId] = useState("");
   const [removalId, setRemovalId] = useState("");
-  const [removalChosen, setRemovalChosen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [instagram, setInstagram] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [waitlistStatus, setWaitlistStatus] = useState("idle");
-  const [formError, setFormError] = useState("");
-  const [formNotice, setFormNotice] = useState("");
-  const [waitlistError, setWaitlistError] = useState("");
-  const [isStudent, setIsStudent] = useState(null);
-
-  const phoneRef = useRef(null);
-  const instagramRef = useRef(null);
+  const [status, setStatus] = useState("idle"); // idle | submitting | done | error
+  const [errorMsg, setErrorMsg] = useState("");
+  const [confirmedBooking, setConfirmedBooking] = useState(null);
 
   useEffect(() => {
-    fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
-    setHasMounted(true);
+    fetch("/api/slots")
+      .then((r) => r.json())
+      .then((data) => setSlots(data.slots || []))
+      .catch(() => setSlots([]));
   }, []);
 
+  // Only show removal-friendly (3 hr) slots once a removal is selected.
   const eligibleSlots = useMemo(() => {
     if (!slots) return null;
-    if (!removalId) return slots.filter((s) => (s.duration || 120) < 180);
+    if (!removalId) return slots;
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
 
-  function handleNameKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      phoneRef.current?.focus();
-    }
-  }
+  const timesForDate = useMemo(
+    () => (eligibleSlots || []).filter((s) => s.date === selectedDate),
+    [eligibleSlots, selectedDate]
+  );
 
-  function handlePhoneKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      instagramRef.current?.focus();
+  // Clear date/slot selections whenever the removal filter changes them out
+  // from under the client.
+  useEffect(() => {
+    if (!eligibleSlots) return;
+    if (selectedDate && !eligibleSlots.some((s) => s.date === selectedDate)) {
+      setSelectedDate("");
+      setSlotId("");
+    } else if (slotId && !eligibleSlots.some((s) => s.id === slotId)) {
+      setSlotId("");
     }
-  }
+  }, [eligibleSlots, selectedDate, slotId]);
 
-  function handleInstagramKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      instagramRef.current?.blur();
-    }
-  }
+  const price = sizeId && tierId ? priceFor(sizeId, tierId, removalId || null) : null;
+  const dueAtAppointment = price != null ? Math.max(price - DEPOSIT_AMOUNT, 0) : null;
+  const canSubmit = slotId && sizeId && tierId && name && phone;
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFormError("");
-    setFormNotice("");
-    const missing = [];
-    if (!name) missing.push("Name");
-    if (!phone) missing.push("Phone");
-    if (!instagram) missing.push("Instagram");
-    if (isStudent === null) missing.push("student status");
-    if (!slotId) {
-      if (eligibleSlots?.length === 0) {
-        setFormNotice("Currently fully booked! Feel free to join the waitlist !! ♡");
-        return;
-      }
-      missing.push("a time slot");
-    }
-    if (missing.length > 0) {
-      setFormError(`Please fill in: ${missing.join(", ")}`);
-      return;
-    }
+    if (!canSubmit) return;
     setStatus("submitting");
+    setErrorMsg("");
     try {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, isStudent }),
+        body: JSON.stringify({
+          slotId,
+          sizeId,
+          tierId,
+          removalId: removalId || null,
+          name,
+          phone,
+          instagram,
+        }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Booking failed");
-      }
-
-      const slot = slots.find((s) => s.id === slotId);
-      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-      const when = slot ? `${formatDate(slot.date)} at ${formatTime(slot.time)}` : "";
-      const removalLabel = removal ? removal.label : "no removal";
-
-      const params = new URLSearchParams({ when, removal: removalLabel });
-      router.push(`/book/confirmed?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+      setConfirmedBooking(data.booking);
+      setStatus("done");
     } catch (err) {
       setStatus("error");
-      setFormError(err.message);
+      setErrorMsg(err.message);
     }
   }
 
-  async function handleWaitlistSubmit() {
-    setWaitlistError("");
-    const missing = [];
-    if (!name) missing.push("Name");
-    if (!phone) missing.push("Phone");
-    if (!instagram) missing.push("Instagram");
-    if (!removalChosen) missing.push("a removal option");
-    if (missing.length > 0) {
-      setWaitlistError(`Please fill in: ${missing.join(", ")}`);
-      return;
-    }
-    setWaitlistStatus("submitting");
-    try {
-      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-      const res = await fetch("/api/admin/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, instagram, removal: removal ? removal.label : "None needed" }),
-      });
-      if (!res.ok) throw new Error("Failed to join");
-      setWaitlistStatus("done");
-    } catch (err) {
-      setWaitlistError("Error: " + err.message);
-      setWaitlistStatus("idle");
-    }
-  }
+  if (status === "done" && confirmedBooking) {
+    const manageLink =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/manage?id=${confirmedBooking.id}&t=${confirmedBooking.manageToken}`
+        : "";
 
-  if (!hasMounted) return <><Nav /><main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center"><p className="text-base text-ink/50">Loading booking portal…</p></main><Footer /></>;
+    return (
+      <>
+        <Nav />
+        <main className="mx-auto max-w-xl px-6 py-28 text-center">
+          <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Request sent</p>
+          <h1 className="font-display text-3xl text-inkDeep mb-4">
+            You're on the list <span className="font-script text-4xl text-umber">✿</span>
+          </h1>
+          <p className="text-ink/70 mb-8 text-lg">
+            Send your ${DEPOSIT_AMOUNT} deposit via Zelle to{" "}
+            <span className="text-inkDeep font-medium">626-295-8572</span> (no note needed — an
+            emoji is fine if one's required). Your slot is confirmed once I approve your
+            request.
+          </p>
+
+          <div className="rounded-2xl ring-1 ring-line/70 bg-stoneDeep/60 p-6 mb-8 text-left">
+            <p className="text-sm text-ink/60 mb-2">
+              Save this link — it's the only way to reschedule or cancel later:
+            </p>
+            <a
+              href={manageLink}
+              className="block break-all text-sm text-umber hover:underline"
+            >
+              {manageLink}
+            </a>
+          </div>
+
+          <a
+            href="https://instagram.com/nsyw.nails"
+            target="_blank"
+            rel="noreferrer"
+            className="text-umber hover:underline"
+          >
+            Questions? DM @nsyw.nails
+          </a>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Nav />
       <main className="mx-auto max-w-2xl px-6 pt-16 pb-24">
-        <h1 className="font-display text-4xl text-inkDeep mb-4">Pick your appointment</h1>
-        <form onSubmit={handleSubmit} className="space-y-10">
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Your info</h2>
-            <div className="grid gap-3 max-w-md">
-              <input
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={handleNameKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
-              <input
-                ref={phoneRef}
-                type="tel"
-                placeholder="Phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onKeyDown={handlePhoneKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
-              <input
-                ref={instagramRef}
-                placeholder="Instagram"
-                value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
-                onKeyDown={handleInstagramKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
-            </div>
-          </div>
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Student status</h2>
-            <p className="text-sm text-ink/60 mb-4">Student pricing is self-reported and requires a valid student status.</p>
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <button type="button" onClick={() => setIsStudent(true)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === true ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                Yes, I'm a student
-              </button>
-              <button type="button" onClick={() => setIsStudent(false)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === false ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                No, regular rate
-              </button>
-            </div>
-          </div>
+        <p className="text-sm uppercase tracking-[0.15em] text-umber mb-3">Book a slot</p>
+        <h1 className="font-display text-4xl text-inkDeep mb-4">
+          Pick your <span className="font-script text-5xl text-umber">appointment</span>
+        </h1>
+        <p className="text-ink/70 mb-10 text-lg">
+          Slots are posted monthly and go fast. Choose an open time, your service, and confirm
+          with a ${DEPOSIT_AMOUNT} deposit.
+        </p>
 
+        <form onSubmit={handleSubmit} className="space-y-10">
+          {/* Removal — asked first so we can filter slots correctly */}
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">3. Removal</h2>
-            <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">
+              1. Removal <span className="text-base text-ink/50 font-body not-italic">(if needed)</span>
+            </h2>
+            <p className="mb-3 text-sm text-ink/50">
+              Removals are only offered for sets originally done here — no foreign removals.
+              Choosing one below filters the calendar to dates with room for it.
+            </p>
             <div className="grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
+              <button
+                type="button"
+                onClick={() => setRemovalId("")}
+                className={`rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
+                  removalId === "" ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                }`}
+              >
+                None needed
+              </button>
               {REMOVALS.map((r) => (
-                <button type="button" key={r.id} onClick={() => { setRemovalId(r.id); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                  {r.label} +${r.price}
+                <button
+                  type="button"
+                  key={r.id}
+                  onClick={() => setRemovalId(r.id)}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
+                    removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                  }`}
+                >
+                  <span>{r.label}</span>
+                  <span className="text-umber font-display text-lg">+${r.price}</span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Date + time via calendar */}
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Open slots</h2>
-            {eligibleSlots?.length === 0 ? (
-              <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
-                {waitlistStatus === "done" ? (
-                  <div className="py-4">
-                    <h3 className="font-display text-lg text-inkDeep mb-2">You're on the list! ✿</h3>
-                    <p className="text-sm text-ink/70">You've successfully joined the waitlist! If there are any spots that open up, I will contact you! Thank you so much for your support!!</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 max-w-md mx-auto">
-                    <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nailsbynatwu on Instagram for availability updates! In the meantime, feel free to join the waitlist!
-                    </p>
-                    {waitlistError && (
-                      <p className="text-sm text-red-600 font-medium">{waitlistError}</p>
-                    )}
-                    <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-mist">
-                      {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
-                    </button>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">2. Date &amp; time</h2>
+            {removalId && (
+              <p className="mb-3 text-sm text-ink/50">
+                Showing only dates with room for a removal.
+              </p>
+            )}
+            {eligibleSlots === null && <p className="text-base text-ink/50">Loading availability…</p>}
+            {eligibleSlots !== null && eligibleSlots.length === 0 && (
+              <p className="text-base text-ink/60 rounded-xl bg-stoneDeep/60 ring-1 ring-line/70 p-4">
+                {removalId
+                  ? "No removal-friendly slots open right now — check back soon or DM @nsyw.nails."
+                  : "No open slots right now — check back soon or follow @nsyw.nails for when new dates drop."}
+              </p>
+            )}
+            {eligibleSlots !== null && eligibleSlots.length > 0 && (
+              <>
+                <Calendar
+                  slots={eligibleSlots}
+                  selectedDate={selectedDate}
+                  onSelectDate={(d) => {
+                    setSelectedDate(d);
+                    setSlotId("");
+                  }}
+                />
+                {selectedDate && (
+                  <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-3">
+                    {timesForDate.map((s) => (
+                      <button
+                        type="button"
+                        key={s.id}
+                        onClick={() => setSlotId(s.id)}
+                        className={`rounded-xl px-4 py-3 text-sm ring-1 transition ${
+                          slotId === s.id
+                            ? "bg-inkDeep text-mist ring-inkDeep"
+                            : "ring-line hover:bg-mist text-ink"
+                        }`}
+                      >
+                        {formatTime(s.time)}
+                        {(s.duration || 120) >= 180 && (
+                          <span className="block text-xs opacity-70">extended</span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {eligibleSlots?.map((s) => (
-                  <button type="button" key={s.id} onClick={() => setSlotId(s.id)} className={`rounded-xl px-4 py-3 ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}>
-                    {formatDate(s.date)} <br /> {formatTime(s.time)}
-                  </button>
-                ))}
-              </div>
+              </>
             )}
           </div>
 
-          {formError && (
-            <p className="text-sm text-red-600 font-medium text-center">{formError}</p>
-          )}
-          {formNotice && (
-            <p className="text-sm text-umber font-medium text-center">{formNotice}</p>
-          )}
+          {/* Size */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Length</h2>
+            <div className="grid gap-2">
+              {SIZES.map((s) => (
+                <button
+                  type="button"
+                  key={s.id}
+                  onClick={() => setSizeId(s.id)}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-base ring-1 transition ${
+                    sizeId === s.id ? "bg-mist ring-inkDeep" : "ring-line hover:bg-mist"
+                  }`}
+                >
+                  <span>{s.label}</span>
+                  <span className="text-umber font-display text-lg">${s.price}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
-            {status === "submitting" ? "Sending..." : "Book Now"}
-          </button>
+          {/* Tier */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Design tier</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {TIERS.map((tier) => (
+                <SwatchTier
+                  key={tier.id}
+                  tier={tier}
+                  interactive
+                  selected={tierId === tier.id}
+                  onClick={() => setTierId(tier.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">5. Your info</h2>
+            <div className="grid gap-3">
+              <input
+                required
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-base"
+              />
+              <input
+                required
+                type="tel"
+                placeholder="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-base"
+              />
+              <input
+                placeholder="Instagram username"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                className="rounded-xl px-4 py-3 bg-mist ring-1 ring-line focus:ring-inkDeep outline-none text-base"
+              />
+            </div>
+          </div>
+
+          {/* Summary + submit */}
+          <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line/70 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-base text-ink/70">Service total</span>
+              <span className="font-display text-xl text-ink">
+                {price != null ? `$${price}` : "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-base text-ink/70">
+                Due day-of <span className="text-sm text-ink/45">(after ${DEPOSIT_AMOUNT} deposit)</span>
+              </span>
+              <span className="font-display text-2xl text-umber">
+                {dueAtAppointment != null ? `$${dueAtAppointment}` : "—"}
+              </span>
+            </div>
+            <p className="text-sm text-ink/50 mb-4">
+              A ${DEPOSIT_AMOUNT} Zelle deposit (626-295-8572) secures this slot once your
+              request is approved — it comes off your total above.
+            </p>
+            {errorMsg && <p className="text-base text-umber mb-4">{errorMsg}</p>}
+            <button
+              type="submit"
+              disabled={!canSubmit || status === "submitting"}
+              className="w-full rounded-full bg-inkDeep px-7 py-3 font-body text-lg text-mist transition hover:bg-umber disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {status === "submitting" ? "Sending request…" : "Request this slot"}
+            </button>
+          </div>
         </form>
       </main>
       <Footer />
