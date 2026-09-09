@@ -1,17 +1,16 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { NextResponse } from "next/server";
-import crypto from "crypto";
-import { getSlots, setSlotStatus, addBooking } from "@/lib/kv";
-import { priceFor, SIZES, TIERS, REMOVALS } from "@/lib/pricing";
+import { getSlots, setSlotStatus, addBooking, claimSlot, releaseSlotClaim } from "@/lib/kv";
+import { REMOVALS } from "@/lib/pricing";
 import { notifyOwner } from "@/lib/sms";
 
 export async function POST(request) {
   const body = await request.json();
-  const { slotId, name, phone, instagram, sizeId, tierId, removalId } = body || {};
-
-  if (!slotId || !name || !phone || !sizeId || !tierId) {
+  const { slotId, name, phone, instagram, removalId } = body || {};
+  if (!slotId || !name || !phone || !instagram) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
-
   const slots = await getSlots();
   const slot = slots.find((s) => s.id === slotId);
   if (!slot || slot.status !== "open") {
@@ -21,43 +20,45 @@ export async function POST(request) {
     );
   }
 
-  const price = priceFor(sizeId, tierId, removalId || null);
-  if (price == null) {
-    return NextResponse.json({ error: "Invalid service selection." }, { status: 400 });
+  // Atomic claim — only one concurrent request can win this, even under heavy traffic.
+  const claimed = await claimSlot(slotId);
+  if (!claimed) {
+    return NextResponse.json(
+      { error: "That slot was just taken by someone else. Please pick another." },
+      { status: 409 }
+    );
   }
-
-  // Hold the slot immediately so two people can't grab the same time.
-  await setSlotStatus(slotId, "held");
-
-  const size = SIZES.find((s) => s.id === sizeId);
-  const tier = TIERS.find((t) => t.id === tierId);
-  const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-  const manageToken = crypto.randomBytes(16).toString("hex");
-
-  const booking = await addBooking({
-    slotId,
-    date: slot.date,
-    time: slot.time,
-    duration: slot.duration || 120,
-    name,
-    phone,
-    instagram: instagram || "",
-    size: size.label,
-    tier: `Tier ${tier.label}`,
-    removal: removal ? removal.label : "",
-    price,
-    manageToken,
-  });
 
   try {
-    await notifyOwner(
-      `New booking request: ${name} (${phone}${instagram ? `, @${instagram.replace(/^@/, "")}` : ""}) — ${slot.date} ${slot.time} — ${size.label}, Tier ${tier.label}${
-        removal ? `, ${removal.label}` : ""
-      } — $${price}. Approve in your admin page.`
-    );
-  } catch (e) {
-    console.error("SMS notify failed:", e);
-  }
+    await setSlotStatus(slotId, "held");
 
-  return NextResponse.json({ booking });
+    const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
+
+    const booking = await addBooking({
+      slotId,
+      date: slot.date,
+      time: slot.time,
+      duration: slot.duration || 120,
+      name,
+      phone,
+      instagram,
+      removal: removal ? removal.label : "",
+      isStudent: !!isStudent,
+    });
+
+    try {
+      await notifyOwner(
+        `New booking request: ${name} (${phone}, @${instagram.replace(/^@/, "")}) — ${slot.date} ${slot.time}${removal ? ` — ${removal.label}` : ""}. Approve in your admin page.`
+      );
+    } catch (e) {
+      console.error("SMS notify failed:", e);
+    }
+
+    return NextResponse.json({ booking });
+  } catch (error) {
+    // Something failed after claiming — release the lock so the slot isn't stuck forever.
+    await releaseSlotClaim(slotId);
+    await setSlotStatus(slotId, "open");
+    return NextResponse.json({ error: "Booking failed. Please try again." }, { status: 500 });
+  }
 }
