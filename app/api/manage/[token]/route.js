@@ -89,8 +89,18 @@ export async function POST(request, { params }) {
             console.error("Owner reschedule notice failed:", e);
         }
 
+        try {
+            const friendlyDate = formatFriendlyDate(newSlot.date);
+            const friendlyTime = formatFriendlyTime(newSlot.time);
+            await sendClientEmail(
+                booking.email,
+                "Your appointment has been rescheduled — nailsbynatwu",
+                `Hi ${booking.name}! Your appointment has been successfully rescheduled to ${friendlyDate} at ${friendlyTime}. This is now pending approval again — I'll confirm with you shortly!`
+            );
+        } catch (e) {
+            console.error("Client reschedule email failed:", e);
+        }
+
         return NextResponse.json({ message: "Booking rescheduled." });
     }
-
-    return NextResponse.json({ error: "Invalid action." }, { status: 400 });
 }
