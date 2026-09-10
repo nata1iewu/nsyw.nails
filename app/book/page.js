@@ -54,8 +54,9 @@ export default function Book() {
 
   const eligibleSlots = useMemo(() => {
     if (!slots) return null;
-    if (!removalId) return slots.filter((s) => (s.duration || 120) < 180);
-    return slots.filter((s) => (s.duration || 120) >= 180);
+    if (removalId === "without_set") return slots.filter((s) => (s.duration || 120) === 60);
+    if (removalId) return slots.filter((s) => (s.duration || 120) >= 180);
+    return slots.filter((s) => (s.duration || 120) < 180);
   }, [slots, removalId]);
 
   const datesWithSlots = useMemo(() => {
@@ -281,6 +282,11 @@ export default function Book() {
                 </button>
               ))}
             </div>
+            {removalId !== "" && removalChosen && (
+              <p className="mt-3 text-base font-bold text-red-600">
+                Please ensure that your current set is done by me before selecting a removal option. I DO NOT DO FOREIGN REMOVALS!
+              </p>
+            )}
           </div>
 
           <div>

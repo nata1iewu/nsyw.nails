@@ -1,15 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+function dateKey(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
   const [waitlist, setWaitlist] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [allSlots, setAllSlots] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("120");
   const [bulkInput, setBulkInput] = useState("");
+  const [viewMonth, setViewMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+  const [selectedDate, setSelectedDate] = useState(null);
 
   async function fetchData() {
     try {
@@ -29,12 +39,44 @@ export default function Admin() {
         alert("Session expired — please log in again.");
         setAuthed(false);
       }
+      const slotsRes = await fetch("/api/admin/add-slot");
+      if (slotsRes.ok) {
+        const data = await slotsRes.json();
+        setAllSlots(data.slots || []);
+      }
     } catch (e) { console.error("Error loading data", e); }
   }
 
   useEffect(() => {
     if (authed) fetchData();
   }, [authed]);
+
+  const datesWithSlots = useMemo(() => {
+    const set = new Set();
+    allSlots.forEach((s) => set.add(s.date));
+    return set;
+  }, [allSlots]);
+
+  const slotsForSelectedDate = useMemo(() => {
+    if (!selectedDate) return [];
+    return allSlots.filter((s) => s.date === selectedDate);
+  }, [allSlots, selectedDate]);
+
+  const calendarDays = useMemo(() => {
+    const { year, month } = viewMonth;
+    const firstDay = new Date(year, month, 1);
+    const startWeekday = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days = [];
+    for (let i = 0; i < startWeekday; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    return days;
+  }, [viewMonth]);
+
+  const monthLabel = new Date(viewMonth.year, viewMonth.month, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   async function handleBookingAction(id, action) {
     const res = await fetch("/api/admin/bookings", {
@@ -100,6 +142,20 @@ export default function Admin() {
     }
   }
 
+  async function handleRemoveSlot(id) {
+    if (!confirm("Remove this slot?")) return;
+    const res = await fetch("/api/admin/add-slot", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      fetchData();
+    } else {
+      alert("Failed to remove slot.");
+    }
+  }
+
   if (!authed) {
     return (
       <main className="mx-auto max-w-sm px-6 py-28">
@@ -122,7 +178,7 @@ export default function Admin() {
     <main className="max-w-3xl mx-auto p-10">
       <h1 className="text-3xl mb-10">Dashboard</h1>
       <button onClick={fetchData} className="mb-8 text-sm underline text-inkDeep">
-        ↻ Refresh bookings & waitlist
+        ↻ Refresh bookings, waitlist & slots
       </button>
 
       <div className="mb-10 p-6 border rounded-2xl">
@@ -132,6 +188,7 @@ export default function Admin() {
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded" />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="p-2 border rounded" />
           <select value={duration} onChange={(e) => setDuration(e.target.value)} className="p-2 border rounded">
+            <option value="60">1 hr (removal only, no new set)</option>
             <option value="120">2 hrs (standard)</option>
             <option value="180">3 hrs (removal-eligible)</option>
             <option value="240">4 hrs (removal-eligible)</option>
@@ -167,6 +224,66 @@ export default function Admin() {
             }
           }
         }} className="block text-red-500 text-sm underline mt-3">Clear All Slots</button>
+      </div>
+
+      {/* Calendar view for managing individual slots */}
+      <div className="mb-10 p-6 border rounded-2xl">
+        <h2 className="text-lg font-bold mb-4">Manage Slots</h2>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setViewMonth((v) => v.month === 0 ? { year: v.year - 1, month: 11 } : { year: v.year, month: v.month - 1 })}
+            className="p-2 rounded hover:bg-gray-100"
+          >
+            ←
+          </button>
+          <p className="font-bold">{monthLabel}</p>
+          <button
+            onClick={() => setViewMonth((v) => v.month === 11 ? { year: v.year + 1, month: 0 } : { year: v.year, month: v.month + 1 })}
+            className="p-2 rounded hover:bg-gray-100"
+          >
+            →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 mb-1 text-center text-xs uppercase text-gray-400">
+          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <div key={i}>{d}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-1 mb-4">
+          {calendarDays.map((day, i) => {
+            if (day === null) return <div key={i} />;
+            const key = dateKey(viewMonth.year, viewMonth.month, day);
+            const hasSlots = datesWithSlots.has(key);
+            const isSelected = selectedDate === key;
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDate(key)}
+                className={`aspect-square rounded text-sm flex items-center justify-center ${isSelected ? "bg-black text-white" : hasSlots ? "bg-yellow-100 hover:bg-yellow-200" : "text-gray-300"
+                  }`}
+              >
+                {day}
+              </button>
+            );
+          })}
+        </div>
+
+        {selectedDate && (
+          <div className="border-t pt-4">
+            <p className="text-sm font-bold mb-2">Slots on {selectedDate}</p>
+            {slotsForSelectedDate.length === 0 ? (
+              <p className="text-sm text-gray-500">No slots on this date.</p>
+            ) : (
+              slotsForSelectedDate.map((s) => (
+                <div key={s.id} className="flex items-center justify-between py-2 border-b">
+                  <span className="text-sm">{s.time} — {s.duration || 120} min — <span className="uppercase">{s.status}</span></span>
+                  <button onClick={() => handleRemoveSlot(s.id)} className="text-red-500 text-sm underline">
+                    Remove
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mb-10">

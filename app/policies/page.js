@@ -28,11 +28,14 @@ export default function Policies() {
           </p>
         </section>
 
-        <section className="mb-10">
+        <section className="mb-10 rounded-2xl bg-red-50 ring-1 ring-red-200 p-6">
           <p className="text-ink/90 leading-relaxed">
-            I <span className="font-medium text-inkDeep">no longer do foreign soak-offs or
+            I <span className="font-bold text-red-700">no longer do foreign soak-offs or
               removals.</span> So please try to have your previous set removed before coming (unless I did
             your previous set).
+          </p>
+          <p className="mt-3 font-bold text-red-700 leading-relaxed">
+            If you proceed with selecting a removal option despite not having a set done by me, I WILL cancel your appointment.
           </p>
         </section>
 
