@@ -39,7 +39,7 @@ export async function POST(request, { params }) {
 
         try {
             await notifyOwnerEmail(
-                "Booking cancelled — nsywnails",
+                "Booking cancelled — nailsbynatwu",
                 `${booking.name} cancelled their appointment on ${booking.date} at ${booking.time}. The slot has been reopened.`
             );
         } catch (e) {
@@ -51,7 +51,7 @@ export async function POST(request, { params }) {
             const friendlyTime = formatFriendlyTime(booking.time);
             await sendClientEmail(
                 booking.email,
-                "Your appointment has been cancelled — nsywnails",
+                "Your appointment has been cancelled — nailsbynatwu",
                 `Your appointment for ${friendlyDate} at ${friendlyTime} has been successfully cancelled! If you'd like to book again in the future, feel free to check my site or follow @nailsbynatwu on Instagram for updates. Thank you!`
             );
         } catch (e) {
@@ -82,7 +82,7 @@ export async function POST(request, { params }) {
 
         try {
             await notifyOwnerEmail(
-                "Booking rescheduled — nsywnails",
+                "Booking rescheduled — nailsbynatwu",
                 `${booking.name} rescheduled their appointment to ${newSlot.date} at ${newSlot.time}. Please review and approve in your admin page.`
             );
         } catch (e) {

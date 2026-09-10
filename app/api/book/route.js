@@ -48,7 +48,7 @@ export async function POST(request) {
 
     try {
       await notifyOwnerEmail(
-        "New booking request — nsywnails",
+        "New booking request — nailsbynatwu",
         `${name} requested an appointment.\nPhone: ${phone}\nInstagram: ${instagram}\nEmail: ${email}\nDate: ${slot.date} at ${slot.time}${removal ? `\nRemoval: ${removal.label}` : ""}\n\nApprove in your admin page.`
       );
     } catch (e) {
@@ -59,7 +59,7 @@ export async function POST(request) {
       const manageUrl = `https://nsywnails.com/manage/${booking.manageToken}`;
       await sendClientEmail(
         email,
-        "Your appointment request — nsywnails",
+        "Your appointment request — nailsbynatwu",
         `Hi ${name}! Your appointment request for ${slot.date} at ${slot.time} has been received. To reschedule or cancel: ${manageUrl}`
       );
     } catch (e) {
