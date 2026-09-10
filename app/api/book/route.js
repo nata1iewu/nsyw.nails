@@ -7,7 +7,7 @@ import { notifyOwner, sendClientSMS } from "@/lib/sms";
 
 export async function POST(request) {
   const body = await request.json();
-  const { slotId, name, phone, instagram, removalId } = body || {};
+  const { slotId, name, phone, instagram, removalId, isStudent } = body || {};
   if (!slotId || !name || !phone || !instagram) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
@@ -15,7 +15,7 @@ export async function POST(request) {
   const slot = slots.find((s) => s.id === slotId);
   if (!slot || slot.status !== "open") {
     return NextResponse.json(
-      { error: "That slot is no longer available. Please pick another." },
+      { error: "Oh no! This slot has been taken! Please choose another one." },
       { status: 409 }
     );
   }
@@ -24,7 +24,7 @@ export async function POST(request) {
   const claimed = await claimSlot(slotId);
   if (!claimed) {
     return NextResponse.json(
-      { error: "That slot was just taken by someone else. Please pick another." },
+      { error: "Oh no! This slot has been taken! Please choose another one." },
       { status: 409 }
     );
   }
@@ -66,7 +66,7 @@ export async function POST(request) {
 
     return NextResponse.json({ booking });
   } catch (error) {
-    // Something failed after claiming — release the lock so the slot isn't stuck forever.
+    console.error("Booking error:", error);
     await releaseSlotClaim(slotId);
     await setSlotStatus(slotId, "open");
     return NextResponse.json({ error: "Booking failed. Please try again." }, { status: 500 });
