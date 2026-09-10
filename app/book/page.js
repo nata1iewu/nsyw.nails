@@ -35,6 +35,7 @@ export default function Book() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [emailFieldError, setEmailFieldError] = useState("");
   const [instagram, setInstagram] = useState("");
   const [status, setStatus] = useState("idle");
   const [waitlistStatus, setWaitlistStatus] = useState("idle");
