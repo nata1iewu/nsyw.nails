@@ -85,7 +85,7 @@ export default function Services() {
             ))}
           </div>
           <p className="mb-10 text-sm text-ink/50">
-            Tier 4 starts at +$15 — For more intricate and complicated designs
+            Tier 4 ranges +$15–$25 — For more intricate and complicated designs
           </p>
 
           <div className="flex flex-wrap gap-3">

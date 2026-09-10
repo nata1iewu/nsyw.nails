@@ -22,7 +22,7 @@ export default function SwatchTier({ tier, selected = false, onClick, interactiv
         <span className="-mt-1 block font-script text-3xl text-inkDeep">{tier.label}</span>
         <span className="mt-1 block text-sm text-ink/60">{tier.desc}</span>
         <span className="mt-1 block font-display text-sm text-umber">
-          {tier.add === 0 ? "included" : `+$${tier.add}`}
+          {tier.priceRange ? tier.priceRange : tier.add === 0 ? "included" : `+$${tier.add}`}
         </span>
       </span>
     </>
