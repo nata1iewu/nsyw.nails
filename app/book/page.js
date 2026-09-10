@@ -101,7 +101,19 @@ export default function Book() {
   function handleEmailKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      instagramRef.current?.focus();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setEmailFieldError("Please enter a valid email address.");
+      } else {
+        setEmailFieldError("");
+        instagramRef.current?.focus();
+      }
+    }
+  }
+  function handleEmailBlur() {
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailFieldError("Please enter a valid email address.");
+    } else {
+      setEmailFieldError("");
     }
   }
 
@@ -218,15 +230,21 @@ export default function Book() {
                 onKeyDown={handlePhoneKeyDown}
                 className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
               />
-              <input
-                ref={emailRef}
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={handleEmailKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
+              <div>
+                <input
+                  ref={emailRef}
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setEmailFieldError(""); }}
+                  onKeyDown={handleEmailKeyDown}
+                  onBlur={handleEmailBlur}
+                  className="w-full rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+                />
+                {emailFieldError && (
+                  <p className="text-sm text-red-600 mt-1">{emailFieldError}</p>
+                )}
+              </div>
               <input
                 ref={instagramRef}
                 placeholder="Instagram"
