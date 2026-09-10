@@ -34,8 +34,8 @@ export default function Book() {
   const [policyAgreed, setPolicyAgreed] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [instagram, setInstagram] = useState("");
   const [email, setEmail] = useState("");
+  const [instagram, setInstagram] = useState("");
   const [status, setStatus] = useState("idle");
   const [waitlistStatus, setWaitlistStatus] = useState("idle");
   const [formError, setFormError] = useState("");
@@ -43,8 +43,8 @@ export default function Book() {
   const [waitlistError, setWaitlistError] = useState("");
 
   const phoneRef = useRef(null);
-  const instagramRef = useRef(null);
   const emailRef = useRef(null);
+  const instagramRef = useRef(null);
 
   useEffect(() => {
     fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
@@ -94,13 +94,6 @@ export default function Book() {
   function handlePhoneKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      instagramRef.current?.focus();
-    }
-  }
-
-  function handleInstagramKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
       emailRef.current?.focus();
     }
   }
@@ -108,7 +101,14 @@ export default function Book() {
   function handleEmailKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      emailRef.current?.blur();
+      instagramRef.current?.focus();
+    }
+  }
+
+  function handleInstagramKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      instagramRef.current?.blur();
     }
   }
 
@@ -119,8 +119,13 @@ export default function Book() {
     const missing = [];
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
+    if (!email) {
+      missing.push("Email");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
     if (!instagram) missing.push("Instagram");
-    if (!email) missing.push("Email");
     if (isStudent === null) missing.push("student status");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
@@ -214,20 +219,20 @@ export default function Book() {
                 className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
               />
               <input
-                ref={instagramRef}
-                placeholder="Instagram"
-                value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
-                onKeyDown={handleInstagramKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
-              <input
                 ref={emailRef}
                 type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={handleEmailKeyDown}
+                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+              />
+              <input
+                ref={instagramRef}
+                placeholder="Instagram"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                onKeyDown={handleInstagramKeyDown}
                 className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
               />
             </div>
