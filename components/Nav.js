@@ -24,6 +24,9 @@ export default function Nav() {
           <Link href="/policies" className="text-ink/80 transition hover:text-inkDeep">
             Policies
           </Link>
+          <Link href="/faq" className="text-ink/80 transition hover:text-inkDeep">
+            FAQ
+          </Link>
           <Link
             href="/book"
             className="rounded-full bg-inkDeep px-10 py-2.5 text-base text-mist transition hover:bg-umber"
@@ -64,6 +67,9 @@ export default function Nav() {
           </Link>
           <Link href="/policies" className="py-3 text-ink/80" onClick={() => setOpen(false)}>
             Policies
+          </Link>
+          <Link href="/faq" className="py-3 text-ink/80" onClick={() => setOpen(false)}>
+            FAQ
           </Link>
           <Link
             href="/book"

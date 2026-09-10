@@ -3,6 +3,7 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getBookings, setBookingStatus, setSlotStatus, clearBookings, releaseSlotClaim } from "@/lib/kv";
+import { sendClientSMS } from "@/lib/sms";
 
 export async function GET(request) {
   if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,8 +23,15 @@ export async function POST(request) {
 
   if (action === "approve") {
     await setSlotStatus(booking.slotId, "booked");
+    try {
+      await sendClientSMS(
+        booking.phone,
+        `Hi ${booking.name}! Your appointment on ${booking.date} at ${booking.time} is confirmed! A $5 deposit is required — I'll follow up with payment details. See you then! ✿`
+      );
+    } catch (e) {
+      console.error("Confirmation SMS failed:", e);
+    }
   } else {
-    // Denying frees the slot back up — release both the status and the atomic claim.
     await setSlotStatus(booking.slotId, "open");
     await releaseSlotClaim(booking.slotId);
   }
