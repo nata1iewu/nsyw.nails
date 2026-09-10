@@ -6,11 +6,6 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { REMOVALS } from "@/lib/pricing";
 
-function formatDate(dateStr) {
-  const d = new Date(`${dateStr}T00:00:00`);
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-}
-
 function formatTime(timeStr) {
   const [h, m] = timeStr.split(":").map(Number);
   const d = new Date();
@@ -18,11 +13,20 @@ function formatTime(timeStr) {
   return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function dateKey(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
 export default function Book() {
   const router = useRouter();
   const [hasMounted, setHasMounted] = useState(false);
   const [slots, setSlots] = useState(null);
   const [slotId, setSlotId] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [viewMonth, setViewMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
   const [removalId, setRemovalId] = useState("");
   const [removalChosen, setRemovalChosen] = useState(false);
   const [name, setName] = useState("");
@@ -33,7 +37,6 @@ export default function Book() {
   const [formError, setFormError] = useState("");
   const [formNotice, setFormNotice] = useState("");
   const [waitlistError, setWaitlistError] = useState("");
-  const [isStudent, setIsStudent] = useState(null);
 
   const phoneRef = useRef(null);
   const instagramRef = useRef(null);
@@ -48,6 +51,33 @@ export default function Book() {
     if (!removalId) return slots.filter((s) => (s.duration || 120) < 180);
     return slots.filter((s) => (s.duration || 120) >= 180);
   }, [slots, removalId]);
+
+  const datesWithSlots = useMemo(() => {
+    const set = new Set();
+    (eligibleSlots || []).forEach((s) => set.add(s.date));
+    return set;
+  }, [eligibleSlots]);
+
+  const slotsForSelectedDate = useMemo(() => {
+    if (!selectedDate || !eligibleSlots) return [];
+    return eligibleSlots.filter((s) => s.date === selectedDate);
+  }, [eligibleSlots, selectedDate]);
+
+  const calendarDays = useMemo(() => {
+    const { year, month } = viewMonth;
+    const firstDay = new Date(year, month, 1);
+    const startWeekday = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days = [];
+    for (let i = 0; i < startWeekday; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    return days;
+  }, [viewMonth]);
+
+  const monthLabel = new Date(viewMonth.year, viewMonth.month, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   function handleNameKeyDown(e) {
     if (e.key === "Enter") {
@@ -78,7 +108,6 @@ export default function Book() {
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
-    if (isStudent === null) missing.push("student status");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
         setFormNotice("Currently fully booked! Feel free to join the waitlist !! ♡");
@@ -95,7 +124,7 @@ export default function Book() {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, isStudent }),
+        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -104,7 +133,7 @@ export default function Book() {
 
       const slot = slots.find((s) => s.id === slotId);
       const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-      const when = slot ? `${formatDate(slot.date)} at ${formatTime(slot.time)}` : "";
+      const when = slot ? `${slot.date} at ${formatTime(slot.time)}` : "";
       const removalLabel = removal ? removal.label : "no removal";
 
       const params = new URLSearchParams({ when, removal: removalLabel });
@@ -179,26 +208,14 @@ export default function Book() {
               />
             </div>
           </div>
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Student status</h2>
-            <p className="text-sm text-ink/60 mb-4">Student pricing is self-reported and requires a valid student status.</p>
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <button type="button" onClick={() => setIsStudent(true)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === true ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                Yes, I'm a student
-              </button>
-              <button type="button" onClick={() => setIsStudent(false)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === false ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                No, regular rate
-              </button>
-            </div>
-          </div>
 
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">3. Removal</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Removal</h2>
             <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
             <div className="grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
+              <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); setSelectedDate(null); setSlotId(""); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
               {REMOVALS.map((r) => (
-                <button type="button" key={r.id} onClick={() => { setRemovalId(r.id); setRemovalChosen(true); }} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
+                <button type="button" key={r.id} onClick={() => { setRemovalId(r.id); setRemovalChosen(true); setSelectedDate(null); setSlotId(""); }} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
                   {r.label} +${r.price}
                 </button>
               ))}
@@ -206,7 +223,7 @@ export default function Book() {
           </div>
 
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Open slots</h2>
+            <h2 className="font-display text-xl italic text-inkDeep mb-4">3. Open slots</h2>
             {eligibleSlots?.length === 0 ? (
               <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
                 {waitlistStatus === "done" ? (
@@ -217,7 +234,7 @@ export default function Book() {
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
                     <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nailsbynatwu on Instagram for availability updates! In the meantime, feel free to join the waitlist!
+                      Currently fully booked! Follow @nsywnails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
                     </p>
                     {waitlistError && (
                       <p className="text-sm text-red-600 font-medium">{waitlistError}</p>
@@ -229,12 +246,79 @@ export default function Book() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {eligibleSlots?.map((s) => (
-                  <button type="button" key={s.id} onClick={() => setSlotId(s.id)} className={`rounded-xl px-4 py-3 ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}>
-                    {formatDate(s.date)} <br /> {formatTime(s.time)}
+              <div className="rounded-2xl ring-1 ring-line p-4">
+                {/* Calendar header */}
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setViewMonth((v) => v.month === 0 ? { year: v.year - 1, month: 11 } : { year: v.year, month: v.month - 1 })}
+                    className="p-2 rounded-full hover:bg-mist"
+                    aria-label="Previous month"
+                  >
+                    ←
                   </button>
-                ))}
+                  <p className="font-display text-lg text-inkDeep">{monthLabel}</p>
+                  <button
+                    type="button"
+                    onClick={() => setViewMonth((v) => v.month === 11 ? { year: v.year + 1, month: 0 } : { year: v.year, month: v.month + 1 })}
+                    className="p-2 rounded-full hover:bg-mist"
+                    aria-label="Next month"
+                  >
+                    →
+                  </button>
+                </div>
+
+                {/* Weekday labels */}
+                <div className="grid grid-cols-7 gap-1 mb-1 text-center text-xs uppercase tracking-wide text-ink/40">
+                  {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                    <div key={i}>{d}</div>
+                  ))}
+                </div>
+
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {calendarDays.map((day, i) => {
+                    if (day === null) return <div key={i} />;
+                    const key = dateKey(viewMonth.year, viewMonth.month, day);
+                    const hasSlots = datesWithSlots.has(key);
+                    const isSelected = selectedDate === key;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        disabled={!hasSlots}
+                        onClick={() => { setSelectedDate(key); setSlotId(""); }}
+                        className={`aspect-square rounded-lg text-sm flex items-center justify-center transition ${isSelected
+                            ? "bg-inkDeep text-mist"
+                            : hasSlots
+                              ? "bg-mist text-inkDeep hover:ring-1 hover:ring-inkDeep"
+                              : "text-ink/25 cursor-not-allowed"
+                          }`}
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Times for selected date */}
+                {selectedDate && (
+                  <div className="mt-5 pt-5 border-t border-line/70">
+                    <p className="text-sm text-ink/60 mb-3">Available times</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {slotsForSelectedDate.map((s) => (
+                        <button
+                          type="button"
+                          key={s.id}
+                          onClick={() => setSlotId(s.id)}
+                          className={`rounded-xl px-4 py-3 ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}
+                        >
+                          {formatTime(s.time)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

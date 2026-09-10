@@ -3,7 +3,7 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { getSlots, setSlotStatus, addBooking, claimSlot, releaseSlotClaim } from "@/lib/kv";
 import { REMOVALS } from "@/lib/pricing";
-import { notifyOwner } from "@/lib/sms";
+import { notifyOwner, sendClientSMS } from "@/lib/sms";
 
 export async function POST(request) {
   const body = await request.json();
@@ -52,6 +52,16 @@ export async function POST(request) {
       );
     } catch (e) {
       console.error("SMS notify failed:", e);
+    }
+
+    try {
+      const manageUrl = `https://nsywnails.com/manage/${booking.manageToken}`;
+      await sendClientSMS(
+        phone,
+        `Hi ${name}! Your appointment request for ${slot.date} at ${slot.time} has been received. To reschedule or cancel: ${manageUrl}`
+      );
+    } catch (e) {
+      console.error("Client SMS failed:", e);
     }
 
     return NextResponse.json({ booking });
