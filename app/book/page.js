@@ -43,6 +43,7 @@ export default function Book() {
 
   const phoneRef = useRef(null);
   const instagramRef = useRef(null);
+  const emailRef = useRef(null);
 
   useEffect(() => {
     fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
