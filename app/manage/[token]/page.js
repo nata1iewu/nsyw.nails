@@ -58,6 +58,8 @@ export default function ManageBooking() {
         if (res.ok) {
             setMessage("Your appointment has been rescheduled! You'll need approval again.");
             setRescheduling(false);
+            const newSlot = slots.find((s) => s.id === newSlotId);
+            setBooking((b) => ({ ...b, status: "pending", date: newSlot.date, time: newSlot.time }));
         } else {
             setError(data.error || "Failed to reschedule.");
         }
@@ -81,7 +83,19 @@ export default function ManageBooking() {
                     </div>
                 )}
 
-                {booking && booking.status !== "cancelled" && (
+                {booking && booking.status === "approved" && (
+                    <p className="text-base text-ink/80 rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-5">
+                        Your appointment has already been approved so you are unable to edit your slot. Please DM me on Instagram to make any changes.
+                    </p>
+                )}
+
+                {booking && booking.status === "cancelled" && (
+                    <p className="text-base text-ink/80 rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-5">
+                        This appointment has been cancelled.
+                    </p>
+                )}
+
+                {booking && booking.status === "pending" && (
                     <div className="flex flex-col gap-3">
                         {!rescheduling ? (
                             <>

@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { NextResponse } from "next/server";
-import { getBookings, getSlots, setSlotStatus, setBookingStatus, releaseSlotClaim, claimSlot } from "@/lib/kv";
+import { getBookings, getSlots, setSlotStatus, setBookingStatus, setBookingSlot, releaseSlotClaim, claimSlot } from "@/lib/kv";
+import { notifyOwnerEmail, sendClientEmail } from "@/lib/email";
+import { formatFriendlyDate, formatFriendlyTime } from "@/lib/format";
 
 export async function GET(request, { params }) {
     const { token } = await params;
@@ -19,6 +21,13 @@ export async function POST(request, { params }) {
     const booking = bookings.find((b) => b.manageToken === token);
     if (!booking) return NextResponse.json({ error: "Booking not found." }, { status: 404 });
 
+    if (booking.status === "approved") {
+        return NextResponse.json(
+            { error: "Your appointment has already been approved so you are unable to edit your slot. Please DM me on Instagram to make any changes." },
+            { status: 409 }
+        );
+    }
+
     if (booking.status === "cancelled") {
         return NextResponse.json({ error: "This booking is already cancelled." }, { status: 409 });
     }
@@ -27,6 +36,28 @@ export async function POST(request, { params }) {
         await setBookingStatus(booking.id, "cancelled");
         await setSlotStatus(booking.slotId, "open");
         await releaseSlotClaim(booking.slotId);
+
+        try {
+            await notifyOwnerEmail(
+                "Booking cancelled — nsywnails",
+                `${booking.name} cancelled their appointment on ${booking.date} at ${booking.time}. The slot has been reopened.`
+            );
+        } catch (e) {
+            console.error("Owner cancellation notice failed:", e);
+        }
+
+        try {
+            const friendlyDate = formatFriendlyDate(booking.date);
+            const friendlyTime = formatFriendlyTime(booking.time);
+            await sendClientEmail(
+                booking.email,
+                "Your appointment has been cancelled — nsywnails",
+                `Your appointment for ${friendlyDate} at ${friendlyTime} has been successfully cancelled! If you'd like to book again in the future, feel free to check my site or follow @nailsbynatwu on Instagram for updates. Thank you!`
+            );
+        } catch (e) {
+            console.error("Client cancellation email failed:", e);
+        }
+
         return NextResponse.json({ message: "Booking cancelled." });
     }
 
@@ -44,19 +75,19 @@ export async function POST(request, { params }) {
             return NextResponse.json({ error: "That slot was just taken by someone else." }, { status: 409 });
         }
 
-        // Free the old slot
         await setSlotStatus(booking.slotId, "open");
         await releaseSlotClaim(booking.slotId);
-
-        // Claim the new one
         await setSlotStatus(newSlotId, "held");
-
-        const updatedBookings = bookings.map((b) =>
-            b.manageToken === token
-                ? { ...b, slotId: newSlotId, date: newSlot.date, time: newSlot.time, status: "pending" }
-                : b
-        );
         await setBookingSlot(booking.id, newSlotId, newSlot.date, newSlot.time);
+
+        try {
+            await notifyOwnerEmail(
+                "Booking rescheduled — nsywnails",
+                `${booking.name} rescheduled their appointment to ${newSlot.date} at ${newSlot.time}. Please review and approve in your admin page.`
+            );
+        } catch (e) {
+            console.error("Owner reschedule notice failed:", e);
+        }
 
         return NextResponse.json({ message: "Booking rescheduled." });
     }

@@ -4,30 +4,7 @@ import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getBookings, setBookingStatus, setSlotStatus, clearBookings, releaseSlotClaim } from "@/lib/kv";
 import { sendClientEmail } from "@/lib/email";
-
-function formatFriendlyDate(dateStr) {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const d = new Date(year, month - 1, day);
-  const monthName = d.toLocaleDateString("en-US", { month: "long" });
-  const dayNum = d.getDate();
-  const suffix = (n) => {
-    if (n >= 11 && n <= 13) return "th";
-    switch (n % 10) {
-      case 1: return "st";
-      case 2: return "nd";
-      case 3: return "rd";
-      default: return "th";
-    }
-  };
-  return `${monthName} ${dayNum}${suffix(dayNum)} ${year}`;
-}
-
-function formatFriendlyTime(timeStr) {
-  const [h, m] = timeStr.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-}
+import { formatFriendlyDate, formatFriendlyTime } from "@/lib/format";
 
 export async function GET(request) {
   if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,21 +25,27 @@ export async function POST(request) {
   if (action === "approve") {
     await setSlotStatus(booking.slotId, "booked");
     try {
-      await sendClientEmail(
-        booking.email,
-        "Your appointment is confirmed! — nsywnails",
-        `Hi ${booking.name}! Your appointment on ${formatFriendlyDate(booking.date)} at ${formatFriendlyTime(booking.time)} is confirmed! I will be reaching out shortly via the Instagram or phone number you provided me for the REQUIRED $5 deposit!
+      const friendlyDate = formatFriendlyDate(booking.date);
+      const friendlyTime = formatFriendlyTime(booking.time);
+      const textMsg = `Hi ${booking.name}! Your appointment on ${friendlyDate} at ${friendlyTime} is confirmed! I will be reaching out shortly via the Instagram or phone number you provided me for the REQUIRED $5 deposit!
 
 Thank you so much for showing interest in my work :) I appreciate YOU!!
 I can't wait to see you at your appointment!
 
-(if any changes are needed for your appointment, ie. cancellations, please MESSAGE ME on Instagram !!!)
+(After you recieve this appointment confirmation email, you will not be able to edit your booking through my website. If any changes are needed for your appointment, ie. cancellations, please MESSAGE ME on Instagram !!!)
 
 Best Regards,
 Natalie Wu
 
-@nailsbynatwu on instagram`
-      );
+@nailsbynatwu on instagram`;
+
+      const htmlMsg = `<p>Hi ${booking.name}! Your appointment on ${friendlyDate} at ${friendlyTime} is confirmed! I will be reaching out shortly via the Instagram or phone number you provided me for the REQUIRED $5 deposit!</p>
+<p>Thank you so much for showing interest in my work :) I appreciate YOU!!<br/>I can't wait to see you at your appointment!</p>
+<p>(if any changes are needed for your appointment, ie. cancellations, please MESSAGE ME on Instagram !!!)</p>
+<p>Best Regards,<br/>Natalie Wu</p>
+<p><a href="https://instagram.com/nailsbynatwu">@nailsbynatwu on instagram</a></p>`;
+
+      await sendClientEmail(booking.email, "Your appointment is confirmed! — nailsbynatwu", textMsg, htmlMsg);
     } catch (e) {
       console.error("Confirmation email failed:", e);
     }
