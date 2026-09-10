@@ -110,15 +110,24 @@ export default function ManageBooking() {
                             <div>
                                 <p className="mb-3 text-ink/70">Pick a new time:</p>
                                 <div className="grid grid-cols-2 gap-3 mb-4">
-                                    {slots.filter((s) => s.status === "open").map((s) => (
-                                        <button
-                                            key={s.id}
-                                            onClick={() => setNewSlotId(s.id)}
-                                            className={`rounded-xl px-4 py-3 ring-1 ${newSlotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}
-                                        >
-                                            {s.date} {s.time}
-                                        </button>
-                                    ))}
+                                    {slots
+                                        .filter((s) => s.status === "open")
+                                        .filter((s) => {
+                                            const origDuration = booking.duration || 120;
+                                            const slotDuration = s.duration || 120;
+                                            if (origDuration === 60) return slotDuration === 60;
+                                            if (origDuration >= 180) return slotDuration >= 180;
+                                            return slotDuration < 180;
+                                        })
+                                        .map((s) => (
+                                            <button
+                                                key={s.id}
+                                                onClick={() => setNewSlotId(s.id)}
+                                                className={`rounded-xl px-4 py-3 ring-1 ${newSlotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}
+                                            >
+                                                {s.date} {s.time}
+                                            </button>
+                                        ))}
                                 </div>
                                 <button onClick={handleReschedule} className="rounded-full bg-inkDeep px-6 py-3 text-mist">
                                     Confirm new time
