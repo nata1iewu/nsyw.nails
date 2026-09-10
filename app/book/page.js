@@ -7,6 +7,8 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { REMOVALS } from "@/lib/pricing";
 
+const STORAGE_KEY = "nsywnails_booking_draft";
+
 function formatTime(timeStr) {
   const [h, m] = timeStr.split(":").map(Number);
   const d = new Date();
@@ -47,10 +49,41 @@ export default function Book() {
   const emailRef = useRef(null);
   const instagramRef = useRef(null);
 
+  // Load saved draft on mount
   useEffect(() => {
     fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.name) setName(draft.name);
+        if (draft.phone) setPhone(draft.phone);
+        if (draft.email) setEmail(draft.email);
+        if (draft.instagram) setInstagram(draft.instagram);
+        if (draft.isStudent !== undefined && draft.isStudent !== null) setIsStudent(draft.isStudent);
+        if (draft.removalId !== undefined) setRemovalId(draft.removalId);
+        if (draft.removalChosen) setRemovalChosen(draft.removalChosen);
+      }
+    } catch (e) {
+      console.error("Failed to load saved draft", e);
+    }
+
     setHasMounted(true);
   }, []);
+
+  // Save draft whenever relevant fields change
+  useEffect(() => {
+    if (!hasMounted) return;
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ name, phone, email, instagram, isStudent, removalId, removalChosen })
+      );
+    } catch (e) {
+      console.error("Failed to save draft", e);
+    }
+  }, [hasMounted, name, phone, email, instagram, isStudent, removalId, removalChosen]);
 
   const eligibleSlots = useMemo(() => {
     if (!slots) return null;
@@ -111,6 +144,7 @@ export default function Book() {
       }
     }
   }
+
   function handleEmailBlur() {
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailFieldError("Please enter a valid email address.");
@@ -123,6 +157,14 @@ export default function Book() {
     if (e.key === "Enter") {
       e.preventDefault();
       instagramRef.current?.blur();
+    }
+  }
+
+  function clearDraft() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error("Failed to clear draft", e);
     }
   }
 
@@ -170,6 +212,8 @@ export default function Book() {
       const when = slot ? `${slot.date} at ${formatTime(slot.time)}` : "";
       const removalLabel = removal ? removal.label : "no removal";
 
+      clearDraft();
+
       const params = new URLSearchParams({ when, removal: removalLabel, name, phone, instagram, email });
       router.push(`/book/confirmed?${params.toString()}`);
     } catch (err) {
@@ -199,6 +243,7 @@ export default function Book() {
       });
       if (!res.ok) throw new Error("Failed to join");
       setWaitlistStatus("done");
+      clearDraft();
     } catch (err) {
       setWaitlistError("Error: " + err.message);
       setWaitlistStatus("idle");
@@ -314,7 +359,6 @@ export default function Book() {
               </div>
             ) : (
               <div className="rounded-2xl ring-1 ring-line p-4">
-                {/* Calendar header */}
                 <div className="flex items-center justify-between mb-4">
                   <button
                     type="button"
@@ -335,14 +379,12 @@ export default function Book() {
                   </button>
                 </div>
 
-                {/* Weekday labels */}
                 <div className="grid grid-cols-7 gap-1 mb-1 text-center text-xs uppercase tracking-wide text-ink/40">
                   {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
                     <div key={i}>{d}</div>
                   ))}
                 </div>
 
-                {/* Calendar grid */}
                 <div className="grid grid-cols-7 gap-1">
                   {calendarDays.map((day, i) => {
                     if (day === null) return <div key={i} />;
@@ -368,7 +410,6 @@ export default function Book() {
                   })}
                 </div>
 
-                {/* Times for selected date */}
                 {selectedDate && (
                   <div className="mt-5 pt-5 border-t border-line/70">
                     <p className="text-sm text-ink/60 mb-3">Available times</p>
