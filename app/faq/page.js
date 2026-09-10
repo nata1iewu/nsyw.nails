@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 const FAQS = [
     {
         q: "When are booking slots released?",
-        a: "Typically at the end of every month, but for specific dates please check my Instagram where updates will be posted.",
+        a: "Typically at the end of every month, but for specific dates and times please check my Instagram where updates will be posted.",
     },
     {
         q: "Can I book in advance?",
