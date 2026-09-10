@@ -3,7 +3,7 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getBookings, setBookingStatus, setSlotStatus, clearBookings, releaseSlotClaim } from "@/lib/kv";
-import { sendClientSMS } from "@/lib/sms";
+import { sendClientEmail } from "@/lib/email";
 
 export async function GET(request) {
   if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,12 +24,13 @@ export async function POST(request) {
   if (action === "approve") {
     await setSlotStatus(booking.slotId, "booked");
     try {
-      await sendClientSMS(
-        booking.phone,
+      await sendClientEmail(
+        booking.email,
+        "Your appointment is confirmed! — nsywnails",
         `Hi ${booking.name}! Your appointment on ${booking.date} at ${booking.time} is confirmed! A $5 deposit is required — I'll follow up with payment details. See you then! ✿`
       );
     } catch (e) {
-      console.error("Confirmation SMS failed:", e);
+      console.error("Confirmation email failed:", e);
     }
   } else {
     await setSlotStatus(booking.slotId, "open");

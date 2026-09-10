@@ -3,12 +3,12 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { getSlots, setSlotStatus, addBooking, claimSlot, releaseSlotClaim } from "@/lib/kv";
 import { REMOVALS } from "@/lib/pricing";
-import { notifyOwner, sendClientSMS } from "@/lib/sms";
+import { notifyOwnerEmail, sendClientEmail } from "@/lib/email";
 
 export async function POST(request) {
   const body = await request.json();
-  const { slotId, name, phone, instagram, removalId, isStudent } = body || {};
-  if (!slotId || !name || !phone || !instagram) {
+  const { slotId, name, phone, instagram, email, removalId, isStudent } = body || {};
+  if (!slotId || !name || !phone || !instagram || !email) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
   const slots = await getSlots();
@@ -20,7 +20,6 @@ export async function POST(request) {
     );
   }
 
-  // Atomic claim — only one concurrent request can win this, even under heavy traffic.
   const claimed = await claimSlot(slotId);
   if (!claimed) {
     return NextResponse.json(
@@ -42,26 +41,29 @@ export async function POST(request) {
       name,
       phone,
       instagram,
+      email,
       removal: removal ? removal.label : "",
       isStudent: !!isStudent,
     });
 
     try {
-      await notifyOwner(
-        `New booking request: ${name} (${phone}, @${instagram.replace(/^@/, "")}) — ${slot.date} ${slot.time}${removal ? ` — ${removal.label}` : ""}. Approve in your admin page.`
+      await notifyOwnerEmail(
+        "New booking request — nsywnails",
+        `${name} requested an appointment.\nPhone: ${phone}\nInstagram: ${instagram}\nEmail: ${email}\nDate: ${slot.date} at ${slot.time}${removal ? `\nRemoval: ${removal.label}` : ""}\n\nApprove in your admin page.`
       );
     } catch (e) {
-      console.error("SMS notify failed:", e);
+      console.error("Owner email failed:", e);
     }
 
     try {
       const manageUrl = `https://nsywnails.com/manage/${booking.manageToken}`;
-      await sendClientSMS(
-        phone,
+      await sendClientEmail(
+        email,
+        "Your appointment request — nsywnails",
         `Hi ${name}! Your appointment request for ${slot.date} at ${slot.time} has been received. To reschedule or cancel: ${manageUrl}`
       );
     } catch (e) {
-      console.error("Client SMS failed:", e);
+      console.error("Client email failed:", e);
     }
 
     return NextResponse.json({ booking });

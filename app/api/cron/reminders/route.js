@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { getBookings, setBookingReminderSent } from "@/lib/kv";
-import { sendClientSMS } from "@/lib/sms";
+import { sendClientEmail } from "@/lib/email";
 
 function getPacificDateString(daysOffset = 0) {
     const now = new Date();
@@ -29,8 +29,9 @@ export async function GET(request) {
 
     for (const booking of toRemind) {
         try {
-            await sendClientSMS(
-                booking.phone,
+            await sendClientEmail(
+                booking.email,
+                "Appointment reminder — nsywnails",
                 `Hi ${booking.name}! Just a reminder — your nail appointment is tomorrow, ${booking.date} at ${booking.time}. See you then! ✿`
             );
             await setBookingReminderSent(booking.id);

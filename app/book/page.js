@@ -99,7 +99,14 @@ export default function Book() {
   function handleInstagramKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      instagramRef.current?.blur();
+      emailRef.current?.focus();
+    }
+  }
+
+  function handleEmailKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      emailRef.current?.blur();
     }
   }
 
@@ -111,6 +118,7 @@ export default function Book() {
     if (!name) missing.push("Name");
     if (!phone) missing.push("Phone");
     if (!instagram) missing.push("Instagram");
+    if (!email) missing.push("Email");
     if (isStudent === null) missing.push("student status");
     if (!slotId) {
       if (eligibleSlots?.length === 0) {
@@ -129,7 +137,7 @@ export default function Book() {
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, isStudent }),
+        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, email, isStudent }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -141,7 +149,7 @@ export default function Book() {
       const when = slot ? `${slot.date} at ${formatTime(slot.time)}` : "";
       const removalLabel = removal ? removal.label : "no removal";
 
-      const params = new URLSearchParams({ when, removal: removalLabel });
+      const params = new URLSearchParams({ when, removal: removalLabel, name, phone, instagram, email });
       router.push(`/book/confirmed?${params.toString()}`);
     } catch (err) {
       setStatus("error");
@@ -209,6 +217,15 @@ export default function Book() {
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value)}
                 onKeyDown={handleInstagramKeyDown}
+                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
+              />
+              <input
+                ref={emailRef}
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={handleEmailKeyDown}
                 className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
               />
             </div>
