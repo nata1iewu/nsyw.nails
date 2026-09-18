@@ -24,7 +24,7 @@ export default function Home() {
                   Currently in:
                   <br />
                   <span className="font-script text-6xl sm:text-7xl text-umber">
-                    Los Angeles
+                    San Diego
                   </span>
                 </h1>
                 <p className="mt-6 max-w-md text-ink/90 font-body">
