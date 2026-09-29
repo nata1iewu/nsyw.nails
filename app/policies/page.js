@@ -49,8 +49,8 @@ export default function Policies() {
 
         <section className="mb-10">
           <p className="text-ink/90 leading-relaxed">
-            I don't mind if you bring a guest along to your appointment {" "}
-            <span className="font-medium text-inkDeep">but you need to let me know in advance</span>.
+            NO GUESTS ARE ALLOWED TO YOUR APPOINTMENT {" "}
+            <span className="font-medium text-inkDeep">NO EXCEPTIONS</span>.
           </p>
         </section>
 
