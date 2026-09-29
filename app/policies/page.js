@@ -48,8 +48,9 @@ export default function Policies() {
         </section>
 
         <section className="mb-10">
+          <h2 className="font-display text-xl text-inkDeep mb-3"><span className="font-medium text-inkDeep">○ Guest Policy</span></h2>
           <p className="text-ink/90 leading-relaxed">
-            NO GUESTS ARE ALLOWED TO YOUR APPOINTMENT {" "}
+            No guests are allowed to appointments. I am not working in my own space. {" "}
             <span className="font-medium text-inkDeep">NO EXCEPTIONS</span>.
           </p>
         </section>
