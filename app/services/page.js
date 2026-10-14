@@ -25,6 +25,7 @@ export default function Services() {
           falls!
         </p>
 
+
         {/* Length pricing */}
         <section className="mb-14">
           <h2 className="font-display text-xl italic text-inkDeep mb-2">By length</h2>
@@ -48,6 +49,19 @@ export default function Services() {
             ))}
           </div>
         </section>
+        {/* Builder gel */}
+        <section className="mb-14">
+          <h2 className="font-display text-xl italic text-inkDeep mb-5">Builder gel</h2>
+          <div className="rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
+            <div className="flex items-center justify-between px-6 py-4">
+              <span className="font-body text-ink">Builder gel (soft gel)</span>
+              <span className="font-display text-lg text-umber">Starts at $50</span>
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-ink/50">
+            Soft gel only. I do not currently offer hard gel.
+          </p>
+        </section>
 
         {/* Removals */}
         <section className="mb-14">
@@ -66,19 +80,7 @@ export default function Services() {
           </p>
         </section>
 
-        {/* Builder gel */}
-        <section className="mb-14">
-          <h2 className="font-display text-xl italic text-inkDeep mb-5">Builder gel</h2>
-          <div className="rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
-            <div className="flex items-center justify-between px-6 py-4">
-              <span className="font-body text-ink">Builder gel (soft gel)</span>
-              <span className="font-display text-lg text-umber">Starts at $50</span>
-            </div>
-          </div>
-          <p className="mt-3 text-sm text-ink/50">
-            Soft gel only. I do not currently offer hard gel.
-          </p>
-        </section>
+
         {/* Tier pricing + galleries */}
         <section className="mb-16">
           <h2 className="font-display text-xl italic text-inkDeep mb-2">Design tiers</h2>
