@@ -55,7 +55,7 @@ export default function Services() {
           <div className="rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
             <div className="flex items-center justify-between px-6 py-4">
               <span className="font-body text-ink">Builder gel (soft gel)</span>
-              <span className="font-display text-lg text-umber">Starts at $50</span>
+              <span className="font-display text-lg text-umber">$50</span>
             </div>
           </div>
           <p className="mt-3 text-sm text-ink/50">
