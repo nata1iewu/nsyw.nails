@@ -9,6 +9,7 @@ import {
   setSlotStatus,
   setBookingSlot,
   clearBookings,
+  removeBooking,
   claimSlot,
   releaseSlotClaim,
 } from "@/lib/kv";
@@ -16,6 +17,15 @@ import { sendClientEmail } from "@/lib/email";
 import { formatFriendlyDate, formatFriendlyTime } from "@/lib/format";
 
 const IG_URL = "https://instagram.com/nailsbynatwu";
+
+function todayPacific() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 async function handleAdminCancel(booking) {
   await setBookingStatus(booking.id, "cancelled");
@@ -168,6 +178,28 @@ Natalie Wu
 
 export async function DELETE(request) {
   if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  await clearBookings();
-  return NextResponse.json({ message: "Cleared" });
+
+  let id = null;
+  try {
+    const body = await request.json();
+    id = body?.id || null;
+  } catch {
+    // No body sent — treat as "clear all"
+  }
+
+  if (!id) {
+    await clearBookings();
+    return NextResponse.json({ message: "Cleared" });
+  }
+
+  const removed = await removeBooking(id);
+  if (!removed) return NextResponse.json({ error: "Booking not found." }, { status: 404 });
+
+  // If it was still active and upcoming, free its slot so the time isn't stuck.
+  if ((removed.status === "pending" || removed.status === "approved") && removed.date >= todayPacific()) {
+    await setSlotStatus(removed.slotId, "open");
+    await releaseSlotClaim(removed.slotId);
+  }
+
+  return NextResponse.json({ message: "Booking deleted." });
 }

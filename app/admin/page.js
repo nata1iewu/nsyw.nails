@@ -66,6 +66,41 @@ export default function Admin() {
     return allSlots.filter((s) => s.date === selectedDate);
   }, [allSlots, selectedDate]);
 
+  // Maps slotId -> the pending/approved booking currently holding that slot
+  const activeBookingBySlot = useMemo(() => {
+    const map = {};
+    bookings.forEach((b) => {
+      if (b.status === "pending" || b.status === "approved") map[b.slotId] = b;
+    });
+    return map;
+  }, [bookings]);
+
+  const currentMonthKey = (() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
+  })();
+
+  const bookingsByMonth = useMemo(() => {
+    const groups = {};
+    bookings.forEach((b) => {
+      const key = b.date ? b.date.slice(0, 7) : "unknown";
+      (groups[key] = groups[key] || []).push(b);
+    });
+    return Object.keys(groups)
+      .sort((a, b) => (a === "unknown" ? 1 : b === "unknown" ? -1 : b.localeCompare(a)))
+      .map((key) => ({
+        key,
+        label:
+          key === "unknown"
+            ? "No date"
+            : new Date(Number(key.slice(0, 4)), Number(key.slice(5, 7)) - 1, 1).toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+            }),
+        items: groups[key].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
+      }));
+  }, [bookings]);
+
   const calendarDays = useMemo(() => {
     const { year, month } = viewMonth;
     const firstDay = new Date(year, month, 1);
@@ -110,6 +145,24 @@ export default function Admin() {
       fetchData();
     } else {
       alert(data.error || "Failed to cancel booking.");
+    }
+  }
+
+  async function handleDeleteBooking(b) {
+    const active = b.status === "pending" || b.status === "approved";
+    const msg = active
+      ? `Delete ${b.name}'s booking record? If the appointment is still upcoming, its time slot will be reopened. No email will be sent — use "Cancel appointment" if you want to notify them.`
+      : `Permanently delete ${b.name}'s ${b.status} booking record?`;
+    if (!confirm(msg)) return;
+    const res = await fetch("/api/admin/bookings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: b.id }),
+    });
+    if (res.ok) {
+      fetchData();
+    } else {
+      alert("Failed to delete booking.");
     }
   }
 
@@ -184,12 +237,15 @@ export default function Admin() {
     }
   }
 
-  async function handleRemoveSlot(id) {
-    if (!confirm("Remove this slot?")) return;
+  async function handleRemoveSlot(slot, booking) {
+    const msg = booking
+      ? `This slot has an active booking for ${booking.name}. Removing the slot will NOT cancel or email them — cancel the appointment first if you want that. Remove the slot anyway?`
+      : "Remove this slot?";
+    if (!confirm(msg)) return;
     const res = await fetch("/api/admin/add-slot", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id: slot.id }),
     });
     if (res.ok) {
       fetchData();
@@ -314,14 +370,27 @@ export default function Admin() {
             {slotsForSelectedDate.length === 0 ? (
               <p className="text-sm text-gray-500">No slots on this date.</p>
             ) : (
-              slotsForSelectedDate.map((s) => (
-                <div key={s.id} className="flex items-center justify-between py-2 border-b">
-                  <span className="text-sm">{s.time} — {s.duration || 120} min — <span className="uppercase">{s.status}</span></span>
-                  <button onClick={() => handleRemoveSlot(s.id)} className="text-red-500 text-sm underline">
-                    Remove
-                  </button>
-                </div>
-              ))
+              slotsForSelectedDate.map((s) => {
+                const booking = activeBookingBySlot[s.id];
+                return (
+                  <div key={s.id} className="flex items-center justify-between py-2 border-b gap-3">
+                    <span className="text-sm">
+                      {s.time} — {s.duration || 120} min — <span className="uppercase">{s.status}</span>
+                      {booking && (
+                        <>
+                          {" "}— <span className="font-bold">{booking.name}</span>{" "}
+                          <span className="text-gray-500">
+                            ({booking.status === "approved" ? "approved" : "pending approval"})
+                          </span>
+                        </>
+                      )}
+                    </span>
+                    <button onClick={() => handleRemoveSlot(s, booking)} className="text-red-500 text-sm underline shrink-0">
+                      Remove
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         )}
@@ -331,7 +400,7 @@ export default function Admin() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl">Bookings ({bookings.length})</h2>
           <button onClick={async () => {
-            if (confirm("Are you sure? This will delete ALL booking records.")) {
+            if (confirm("Are you sure? This will permanently delete ALL booking records, including past ones. This can't be undone.")) {
               const res = await fetch("/api/admin/bookings", { method: "DELETE" });
               if (res.ok) {
                 alert("All bookings cleared.");
@@ -342,52 +411,77 @@ export default function Admin() {
             }
           }} className="text-red-500 text-sm underline">Clear Bookings</button>
         </div>
+
         {bookings.length === 0 ? (
           <p className="text-sm text-gray-500">No bookings yet.</p>
         ) : (
-          bookings.map((b) => (
-            <div key={b.id} className="py-3 border-b">
-              <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
-              <div className="text-sm text-gray-600 mb-2">
-                {b.phone} {b.email ? `· ${b.email}` : ""} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · {b.isStudent ? "Student rate" : "Regular rate"} · <span className="uppercase">{b.status}</span>
-              </div>
+          bookingsByMonth.map((group) => {
+            const pendingCount = group.items.filter((b) => b.status === "pending").length;
+            return (
+              <details
+                key={group.key}
+                open={group.key >= currentMonthKey}
+                className="mb-4 border rounded-2xl px-4"
+              >
+                <summary className="cursor-pointer select-none py-3 text-lg font-bold">
+                  {group.label} ({group.items.length})
+                  {pendingCount > 0 && (
+                    <span className="ml-3 text-xs font-normal bg-yellow-200 px-2 py-0.5 rounded">
+                      {pendingCount} pending
+                    </span>
+                  )}
+                </summary>
 
-              {b.status === "pending" && (
-                <div className="flex gap-2">
-                  <button onClick={() => handleBookingAction(b.id, "approve")} className="bg-green-600 text-white text-sm px-3 py-1 rounded">Approve</button>
-                  <button onClick={() => handleBookingAction(b.id, "deny")} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Deny</button>
-                </div>
-              )}
+                <div className="pb-2">
+                  {group.items.map((b) => (
+                    <div key={b.id} className="py-3 border-t">
+                      <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {b.phone} {b.email ? `· ${b.email}` : ""} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · {b.isStudent ? "Student rate" : "Regular rate"} · <span className="uppercase">{b.status}</span>
+                      </div>
 
-              {b.status === "approved" && (
-                editingId === b.id ? (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <select
-                      value={editSlotId}
-                      onChange={(e) => setEditSlotId(e.target.value)}
-                      className="p-2 border rounded text-sm"
-                    >
-                      <option value="">Pick a new time…</option>
-                      {openSlots.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.date} at {s.time} ({s.duration || 120} min)
-                        </option>
-                      ))}
-                    </select>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleSaveEdit(b)} className="bg-black text-white text-sm px-3 py-1 rounded">Save & email client</button>
-                      <button onClick={() => { setEditingId(null); setEditSlotId(""); }} className="text-sm underline">Never mind</button>
+                      {editingId === b.id ? (
+                        <div className="flex flex-col gap-2 mt-2">
+                          <select
+                            value={editSlotId}
+                            onChange={(e) => setEditSlotId(e.target.value)}
+                            className="p-2 border rounded text-sm"
+                          >
+                            <option value="">Pick a new time…</option>
+                            {openSlots.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.date} at {s.time} ({s.duration || 120} min)
+                              </option>
+                            ))}
+                          </select>
+                          <div className="flex gap-2">
+                            <button onClick={() => handleSaveEdit(b)} className="bg-black text-white text-sm px-3 py-1 rounded">Save & email client</button>
+                            <button onClick={() => { setEditingId(null); setEditSlotId(""); }} className="text-sm underline">Never mind</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {b.status === "pending" && (
+                            <>
+                              <button onClick={() => handleBookingAction(b.id, "approve")} className="bg-green-600 text-white text-sm px-3 py-1 rounded">Approve</button>
+                              <button onClick={() => handleBookingAction(b.id, "deny")} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Deny</button>
+                            </>
+                          )}
+                          {b.status === "approved" && (
+                            <>
+                              <button onClick={() => { setEditingId(b.id); setEditSlotId(""); }} className="bg-black text-white text-sm px-3 py-1 rounded">Edit time</button>
+                              <button onClick={() => handleCancelBooking(b)} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Cancel appointment</button>
+                            </>
+                          )}
+                          <button onClick={() => handleDeleteBooking(b)} className="border border-red-600 text-red-600 text-sm px-3 py-1 rounded">Delete</button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditingId(b.id); setEditSlotId(""); }} className="bg-black text-white text-sm px-3 py-1 rounded">Edit time</button>
-                    <button onClick={() => handleCancelBooking(b)} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Cancel appointment</button>
-                  </div>
-                )
-              )}
-            </div>
-          ))
+                  ))}
+                </div>
+              </details>
+            );
+          })
         )}
       </div>
 
