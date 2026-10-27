@@ -31,7 +31,7 @@ export async function GET(request) {
         try {
             await sendClientEmail(
                 booking.email,
-                "Appointment reminder — nsywnails",
+                "Appointment reminder — nailsbynatwu",
                 `Hi ${booking.name}! Just a reminder — your nail appointment is tomorrow, ${booking.date} at ${booking.time}. See you then! ✿`
             );
             await setBookingReminderSent(booking.id);
