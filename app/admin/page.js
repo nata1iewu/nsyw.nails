@@ -20,6 +20,8 @@ export default function Admin() {
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editSlotId, setEditSlotId] = useState("");
 
   async function fetchData() {
     try {
@@ -50,6 +52,8 @@ export default function Admin() {
   useEffect(() => {
     if (authed) fetchData();
   }, [authed]);
+
+  const openSlots = useMemo(() => allSlots.filter((s) => s.status === "open"), [allSlots]);
 
   const datesWithSlots = useMemo(() => {
     const set = new Set();
@@ -88,6 +92,44 @@ export default function Admin() {
       fetchData();
     } else {
       alert("Failed to update booking.");
+    }
+  }
+
+  async function handleCancelBooking(b) {
+    if (!confirm(`Cancel ${b.name}'s appointment on ${b.date} at ${b.time}? This will reopen the slot and email them.`)) return;
+    const res = await fetch("/api/admin/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: b.id, action: "cancel" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      alert(data.emailed
+        ? "Appointment cancelled and the client was emailed."
+        : "Appointment cancelled. No email was sent (no email on file, or sending failed).");
+      fetchData();
+    } else {
+      alert(data.error || "Failed to cancel booking.");
+    }
+  }
+
+  async function handleSaveEdit(b) {
+    if (!editSlotId) return alert("Pick a new time first.");
+    const res = await fetch("/api/admin/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: b.id, action: "reschedule", newSlotId: editSlotId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      alert(data.emailed
+        ? "Appointment updated and the client was emailed."
+        : "Appointment updated. No email was sent (no email on file, or sending failed).");
+      setEditingId(null);
+      setEditSlotId("");
+      fetchData();
+    } else {
+      alert(data.error || "Failed to update appointment.");
     }
   }
 
@@ -226,7 +268,6 @@ export default function Admin() {
         }} className="block text-red-500 text-sm underline mt-3">Clear All Slots</button>
       </div>
 
-      {/* Calendar view for managing individual slots */}
       <div className="mb-10 p-6 border rounded-2xl">
         <h2 className="text-lg font-bold mb-4">Manage Slots</h2>
         <div className="flex items-center justify-between mb-4">
@@ -308,13 +349,42 @@ export default function Admin() {
             <div key={b.id} className="py-3 border-b">
               <div className="font-bold">{b.date} at {b.time} — {b.name}</div>
               <div className="text-sm text-gray-600 mb-2">
-                {b.phone} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · {b.isStudent ? "Student rate" : "Regular rate"} · <span className="uppercase">{b.status}</span>
+                {b.phone} {b.email ? `· ${b.email}` : ""} {b.instagram ? `- @${b.instagram}` : ""} {b.removal ? `· ${b.removal}` : ""} · {b.isStudent ? "Student rate" : "Regular rate"} · <span className="uppercase">{b.status}</span>
               </div>
+
               {b.status === "pending" && (
                 <div className="flex gap-2">
                   <button onClick={() => handleBookingAction(b.id, "approve")} className="bg-green-600 text-white text-sm px-3 py-1 rounded">Approve</button>
                   <button onClick={() => handleBookingAction(b.id, "deny")} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Deny</button>
                 </div>
+              )}
+
+              {b.status === "approved" && (
+                editingId === b.id ? (
+                  <div className="flex flex-col gap-2 mt-2">
+                    <select
+                      value={editSlotId}
+                      onChange={(e) => setEditSlotId(e.target.value)}
+                      className="p-2 border rounded text-sm"
+                    >
+                      <option value="">Pick a new time…</option>
+                      {openSlots.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.date} at {s.time} ({s.duration || 120} min)
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleSaveEdit(b)} className="bg-black text-white text-sm px-3 py-1 rounded">Save & email client</button>
+                      <button onClick={() => { setEditingId(null); setEditSlotId(""); }} className="text-sm underline">Never mind</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <button onClick={() => { setEditingId(b.id); setEditSlotId(""); }} className="bg-black text-white text-sm px-3 py-1 rounded">Edit time</button>
+                    <button onClick={() => handleCancelBooking(b)} className="bg-red-600 text-white text-sm px-3 py-1 rounded">Cancel appointment</button>
+                  </div>
+                )
               )}
             </div>
           ))
