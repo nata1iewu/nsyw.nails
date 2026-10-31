@@ -305,7 +305,7 @@ export default function Book() {
 
           <div>
             <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Student status</h2>
-            <p className="text-sm text-ink/60 mb-4">Student pricing is self-reported and requires a valid student status.</p>
+            <p className="text-sm text-ink/60 mb-4">Student pricing is applicable for any valid student status.</p>
             <div className="grid grid-cols-2 gap-3 max-w-md">
               <button type="button" onClick={() => setIsStudent(true)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === true ? "bg-mist ring-inkDeep" : "ring-line"}`}>
                 Yes, I'm a student
@@ -346,7 +346,7 @@ export default function Book() {
                 ) : (
                   <div className="grid gap-3 max-w-md mx-auto">
                     <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nsywnails on Instagram for availability updates! In the meantime, feel free to join the waitlist!
+                      Currently fully booked! Follow @nailsbynatwu on Instagram for availability updates! In the meantime, feel free to join the waitlist!
                     </p>
                     {waitlistError && (
                       <p className="text-sm text-red-600 font-medium">{waitlistError}</p>
