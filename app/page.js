@@ -30,7 +30,7 @@ export default function Home() {
                 <p className="mt-6 max-w-md text-ink/90 font-body">
                   Hi everyone! My name is Natalie and I've been doing nails for roughly 2 years
                   now! Over the school year, I am on campus at UCSD and dorm based, while
-                  outside of the active school year, I am based in Los Angeles, California! I
+                  outside of the active school year, I am based in the San Gabriel Valley! I
                   offer Gel-X and specialize in intricate nail art with a love for asian-style
                   designs! Thank you for visiting my site!!
                 </p>
