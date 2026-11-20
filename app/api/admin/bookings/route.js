@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
-import { DEPOSIT_AMOUNT } from "@/lib/pricing";
 import {
   getBookings,
   getSlots,

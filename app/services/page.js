@@ -53,19 +53,9 @@ export default function Services() {
         <section className="mb-14">
           <h2 className="font-display text-xl italic text-inkDeep mb-5">Builder gel</h2>
           <div className="rounded-2xl ring-1 ring-line/70 overflow-hidden bg-mist/60">
-            <div className="flex items-center justify-between px-6 py-3 border-b border-line/70">
-              <span className="text-sm uppercase tracking-[0.15em] text-ink/50">Service</span>
-              <div className="flex gap-8">
-                <span className="text-sm uppercase tracking-[0.15em] text-ink/50 w-16 text-right">Student</span>
-                <span className="text-sm uppercase tracking-[0.15em] text-ink/50 w-16 text-right">Regular</span>
-              </div>
-            </div>
             <div className="flex items-center justify-between px-6 py-4">
               <span className="font-body text-ink">Builder gel (soft gel)</span>
-              <div className="flex gap-8">
-                <span className="font-display text-lg text-umber w-16 text-right">${BUILDER_GEL.studentPrice}</span>
-                <span className="font-display text-lg text-ink/60 w-16 text-right">${BUILDER_GEL.regularPrice}</span>
-              </div>
+              <span className="font-display text-lg text-umber">$50</span>
             </div>
           </div>
           <p className="mt-3 text-sm text-ink/50">
@@ -131,7 +121,7 @@ export default function Services() {
           <ul className="space-y-2 text-base text-ink/75 list-disc pl-5">
             <li>Appointment Only</li>
             <li>New slots are posted monthly on a first-come, first-serve basis.</li>
-            <li>${DEPOSIT_AMOUNT} deposit via Zelle required to hold your slot.</li>
+            <li>$5 deposit via Zelle required to hold your slot.</li>
             <li>Your request is confirmed once it's manually approved.</li>
             <li>{LOYALTY_NOTE}</li>
           </ul>

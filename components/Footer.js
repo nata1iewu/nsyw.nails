@@ -27,12 +27,6 @@ export default function Footer() {
         </div>
         <div className="flex flex-col">
           <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Before you book</p>
-          <Link href="/policies" className="hover:text-inkDeep transition">
-            Read studio policies →
-          </Link>
-        </div>
-        <div className="flex flex-col">
-          <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Before you book</p>
           <Link href="/policies" className="hover:text-inkDeep transition mb-1">
             Read studio policies →
           </Link>
