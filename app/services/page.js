@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE } from "@/lib/pricing";
+import { SIZES, TIERS, REMOVALS, LOYALTY_NOTE, DEPOSIT_NOTE, DEPOSIT_AMOUNT, BUILDER_GEL } from "@/lib/pricing";
 
 export const metadata = { title: "Services & Pricing — nailsbynatwu" };
 
