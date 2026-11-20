@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { DEPOSIT_AMOUNT } from "@/lib/pricing";
 
 function ConfirmationContent() {
     const params = useSearchParams();
@@ -21,8 +22,7 @@ function ConfirmationContent() {
                     Successfully booked for {when} with {removal}!! ✿
                 </h1>
                 <p className="text-sm text-ink/70 mb-6">
-                    Thank you! I've received your booking and will confirm with you shortly via text or Instagram. A $5 deposit is required but DO NOT send it until I message you! Please keep a look out!
-                </p>
+                    Thank you! I've received your booking and will confirm with you shortly via text or Instagram. A ${DEPOSIT_AMOUNT} deposit is required but DO NOT send it until I message you! Please keep a look out!</p>
 
                 <div className="rounded-xl bg-mist/70 ring-1 ring-line p-4 text-left text-sm text-ink/80 mb-6">
                     <p className="mb-1"><span className="font-bold">Name:</span> {name}</p>
