@@ -3,7 +3,7 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SwatchTier from "@/components/SwatchTier";
-import { TIERS, LOYALTY_NOTE, DEPOSIT_AMOUNT } from "@/lib/pricing";
+import { TIERS, LOYALTY_NOTE } from "@/lib/pricing";
 
 export default function Home() {
   return (
@@ -106,7 +106,7 @@ export default function Home() {
             </p>
           </div>
           <div>
-            <p className="font-display text-lg text-inkDeep mb-1">${DEPOSIT_AMOUNT} deposit</p>
+            <p className="font-display text-lg text-inkDeep mb-1">$5 deposit</p>
             <p className="text-base text-ink/70">Required after confirming your booking.</p>
           </div>
           <div>

@@ -15,7 +15,6 @@ import {
 } from "@/lib/kv";
 import { sendClientEmail } from "@/lib/email";
 import { formatFriendlyDate, formatFriendlyTime } from "@/lib/format";
-import { DEPOSIT_AMOUNT } from "@/lib/pricing";
 
 const IG_URL = "https://instagram.com/nailsbynatwu";
 
@@ -147,7 +146,7 @@ export async function POST(request) {
     try {
       const friendlyDate = formatFriendlyDate(booking.date);
       const friendlyTime = formatFriendlyTime(booking.time);
-      const textMsg = `Hi ${booking.name}! Your appointment on ${friendlyDate} at ${friendlyTime} is confirmed! I will be reaching out shortly via the Instagram or phone number you provided me for the REQUIRED $${DEPOSIT_AMOUNT} deposit!
+      const textMsg = `Hi ${booking.name}! Your appointment on ${friendlyDate} at ${friendlyTime} is confirmed! I will be reaching out shortly via the Instagram or phone number you provided me for the REQUIRED $5 deposit!
 
 Thank you so much for showing interest in my work :) I appreciate YOU!!
 I can't wait to see you at your appointment!
