@@ -1,465 +1,121 @@
-"use client";
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { REMOVALS } from "@/lib/pricing";
+import SwatchTier from "@/components/SwatchTier";
+import { TIERS, LOYALTY_NOTE } from "@/lib/pricing";
 
-const STORAGE_KEY = "nsywnails_booking_draft";
-
-function formatTime(timeStr) {
-  const [h, m] = timeStr.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-}
-
-function dateKey(y, m, d) {
-  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-}
-
-export default function Book() {
-  const router = useRouter();
-  const [hasMounted, setHasMounted] = useState(false);
-  const [slots, setSlots] = useState(null);
-  const [slotId, setSlotId] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [viewMonth, setViewMonth] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() };
-  });
-  const [removalId, setRemovalId] = useState("");
-  const [removalChosen, setRemovalChosen] = useState(false);
-  const [isStudent, setIsStudent] = useState(null);
-  const [policyAgreed, setPolicyAgreed] = useState(false);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailFieldError, setEmailFieldError] = useState("");
-  const [instagram, setInstagram] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [waitlistStatus, setWaitlistStatus] = useState("idle");
-  const [formError, setFormError] = useState("");
-  const [formNotice, setFormNotice] = useState("");
-  const [waitlistError, setWaitlistError] = useState("");
-
-  const phoneRef = useRef(null);
-  const emailRef = useRef(null);
-  const instagramRef = useRef(null);
-
-  // Load saved draft on mount
-  useEffect(() => {
-    fetch("/api/slots").then((r) => r.json()).then((data) => setSlots(data.slots || [])).catch(() => setSlots([]));
-
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const draft = JSON.parse(saved);
-        if (draft.name) setName(draft.name);
-        if (draft.phone) setPhone(draft.phone);
-        if (draft.email) setEmail(draft.email);
-        if (draft.instagram) setInstagram(draft.instagram);
-        if (draft.isStudent !== undefined && draft.isStudent !== null) setIsStudent(draft.isStudent);
-        if (draft.removalId !== undefined) setRemovalId(draft.removalId);
-        if (draft.removalChosen) setRemovalChosen(draft.removalChosen);
-      }
-    } catch (e) {
-      console.error("Failed to load saved draft", e);
-    }
-
-    setHasMounted(true);
-  }, []);
-
-  // Save draft whenever relevant fields change
-  useEffect(() => {
-    if (!hasMounted) return;
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ name, phone, email, instagram, isStudent, removalId, removalChosen })
-      );
-    } catch (e) {
-      console.error("Failed to save draft", e);
-    }
-  }, [hasMounted, name, phone, email, instagram, isStudent, removalId, removalChosen]);
-
-  const eligibleSlots = useMemo(() => {
-    if (!slots) return null;
-    if (removalId === "without_set") return slots.filter((s) => (s.duration || 120) === 60);
-    if (removalId) return slots.filter((s) => (s.duration || 120) >= 180);
-    return slots.filter((s) => (s.duration || 120) < 180);
-  }, [slots, removalId]);
-
-  const datesWithSlots = useMemo(() => {
-    const set = new Set();
-    (eligibleSlots || []).forEach((s) => set.add(s.date));
-    return set;
-  }, [eligibleSlots]);
-
-  const slotsForSelectedDate = useMemo(() => {
-    if (!selectedDate || !eligibleSlots) return [];
-    return eligibleSlots.filter((s) => s.date === selectedDate);
-  }, [eligibleSlots, selectedDate]);
-
-  const calendarDays = useMemo(() => {
-    const { year, month } = viewMonth;
-    const firstDay = new Date(year, month, 1);
-    const startWeekday = firstDay.getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const days = [];
-    for (let i = 0; i < startWeekday; i++) days.push(null);
-    for (let d = 1; d <= daysInMonth; d++) days.push(d);
-    return days;
-  }, [viewMonth]);
-
-  const monthLabel = new Date(viewMonth.year, viewMonth.month, 1).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  function handleNameKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      phoneRef.current?.focus();
-    }
-  }
-
-  function handlePhoneKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      emailRef.current?.focus();
-    }
-  }
-
-  function handleEmailKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setEmailFieldError("Please enter a valid email address.");
-      } else {
-        setEmailFieldError("");
-        instagramRef.current?.focus();
-      }
-    }
-  }
-
-  function handleEmailBlur() {
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailFieldError("Please enter a valid email address.");
-    } else {
-      setEmailFieldError("");
-    }
-  }
-
-  function handleInstagramKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      instagramRef.current?.blur();
-    }
-  }
-
-  function clearDraft() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.error("Failed to clear draft", e);
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setFormError("");
-    setFormNotice("");
-    const missing = [];
-    if (!name) missing.push("Name");
-    if (!phone) missing.push("Phone");
-    if (!email) {
-      missing.push("Email");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setFormError("Please enter a valid email address.");
-      return;
-    }
-    if (!instagram) missing.push("Instagram");
-    if (isStudent === null) missing.push("student status");
-    if (!slotId) {
-      if (eligibleSlots?.length === 0) {
-        setFormNotice("Currently fully booked! Feel free to join the waitlist !! ♡");
-        return;
-      }
-      missing.push("a time slot");
-    }
-    if (!policyAgreed) missing.push("confirmation that you've read the policies");
-    if (missing.length > 0) {
-      setFormError(`Please fill in: ${missing.join(", ")}`);
-      return;
-    }
-    setStatus("submitting");
-    try {
-      const res = await fetch("/api/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId, removalId: removalId || null, name, phone, instagram, email, isStudent }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Booking failed");
-      }
-
-      const slot = slots.find((s) => s.id === slotId);
-      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-      const when = slot ? `${slot.date} at ${formatTime(slot.time)}` : "";
-      const removalLabel = removal ? removal.label : "no removal";
-
-      clearDraft();
-
-      const params = new URLSearchParams({ when, removal: removalLabel, name, phone, instagram, email });
-      router.push(`/book/confirmed?${params.toString()}`);
-    } catch (err) {
-      setStatus("error");
-      setFormError(err.message);
-    }
-  }
-
-  async function handleWaitlistSubmit() {
-    setWaitlistError("");
-    const missing = [];
-    if (!name) missing.push("Name");
-    if (!phone) missing.push("Phone");
-    if (!instagram) missing.push("Instagram");
-    if (!removalChosen) missing.push("a removal option");
-    if (missing.length > 0) {
-      setWaitlistError(`Please fill in: ${missing.join(", ")}`);
-      return;
-    }
-    setWaitlistStatus("submitting");
-    try {
-      const removal = removalId ? REMOVALS.find((r) => r.id === removalId) : null;
-      const res = await fetch("/api/admin/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, instagram, removal: removal ? removal.label : "None needed" }),
-      });
-      if (!res.ok) throw new Error("Failed to join");
-      setWaitlistStatus("done");
-      clearDraft();
-    } catch (err) {
-      setWaitlistError("Error: " + err.message);
-      setWaitlistStatus("idle");
-    }
-  }
-
-  if (!hasMounted) return <><Nav /><main className="mx-auto max-w-2xl px-6 pt-16 pb-24 text-center"><p className="text-base text-ink/50">Loading booking portal…</p></main><Footer /></>;
-
+export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-2xl px-6 pt-16 pb-24">
-        <h1 className="font-display text-4xl text-inkDeep mb-4">Pick your appointment</h1>
-        <form onSubmit={handleSubmit} className="space-y-10">
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">1. Your info</h2>
-            <div className="grid gap-3 max-w-md">
-              <input
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={handleNameKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
-              <input
-                ref={phoneRef}
-                type="tel"
-                placeholder="Phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onKeyDown={handlePhoneKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
+
+      <main>
+        {/* Hero */}
+        <section className="relative overflow-hidden">
+          <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
+            <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              {/* Text */}
               <div>
-                <input
-                  ref={emailRef}
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setEmailFieldError(""); }}
-                  onKeyDown={handleEmailKeyDown}
-                  onBlur={handleEmailBlur}
-                  className="w-full rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-                />
-                {emailFieldError && (
-                  <p className="text-sm text-red-600 mt-1">{emailFieldError}</p>
-                )}
+                <p className="text-sm uppercase tracking-[0.15em] text-umber mb-4">
+                  Gel-X Manicures · Specialized in intricate nail art
+                </p>
+                <h1 className="font-display text-5xl sm:text-6xl leading-[1.05] text-inkDeep">
+                  Currently in:
+                  <br />
+                  <span className="font-script text-6xl sm:text-7xl text-umber">
+                    San Diego
+                  </span>
+                </h1>
+                <p className="mt-6 max-w-md text-ink/90 font-body">
+                  Hi everyone! My name is Natalie and I've been doing nails for roughly 2 years
+                  now! Over the school year, I am on campus at UCSD and dorm based, while
+                  outside of the active school year, I am based in the San Gabriel Valley! I
+                  offer Gel-X and specialize in intricate nail art with a love for asian-style
+                  designs! Thank you for visiting my site!!
+                </p>
+                <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex flex-wrap justify-center items-center gap-4 sm:contents">
+                    <Link
+                      href="/book"
+                      className="rounded-full bg-inkDeep px-7 py-3 font-body text-mist transition hover:bg-clay"
+                    >
+                      See open slots
+                    </Link>
+                    <Link
+                      href="/services"
+                      className="rounded-full px-7 py-3 font-body text-ink ring-1 ring-line transition hover:bg-mist"
+                    >
+                      View pricing
+                    </Link>
+                  </div>
+                  <Link
+                    href="/showcase"
+                    className="rounded-full bg-umber px-7 py-3 font-body text-mist transition hover:bg-clay"
+                  >
+                    Check out some of my work!
+                  </Link>
+                </div>
               </div>
-              <input
-                ref={instagramRef}
-                placeholder="Instagram"
-                value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
-                onKeyDown={handleInstagramKeyDown}
-                className="rounded-xl px-4 py-2.5 bg-mist ring-1 ring-line focus:ring-inkDeep focus:outline-none"
-              />
+
+              {/* Photo */}
+              <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] ring-1 ring-line/70 shadow-sm">
+                  <Image
+                    src="/images/hero.jpg"
+                    alt="Natalie, nail tech at uscd"
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 90vw, 40vw"
+                  />
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">2. Student status</h2>
-            <p className="text-sm text-ink/60 mb-4">Student pricing is applicable for any valid student status.</p>
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <button type="button" onClick={() => setIsStudent(true)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === true ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                Yes, I'm a student
-              </button>
-              <button type="button" onClick={() => setIsStudent(false)} className={`rounded-xl px-4 py-3 ring-1 transition ${isStudent === false ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                No, regular rate
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-2">3. Removal</h2>
-            <p className="text-sm text-ink/80 mb-4">PLEASE NOTE: I DO NOT OFFER FOREIGN REMOVALS <br /> (please do not select a removal option if you got your nails done elsewhere).</p>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => { setRemovalId(""); setRemovalChosen(true); setSelectedDate(null); setSlotId(""); }} className={`rounded-xl px-4 py-3 text-left ring-1 transition ${removalId === "" ? "bg-mist ring-inkDeep" : "ring-line"}`}>None needed</button>
-              {REMOVALS.map((r) => (
-                <button type="button" key={r.id} onClick={() => { setRemovalId(r.id); setRemovalChosen(true); setSelectedDate(null); setSlotId(""); }} className={`rounded-xl px-4 py-3 ring-1 transition ${removalId === r.id ? "bg-mist ring-inkDeep" : "ring-line"}`}>
-                  {r.label} +${r.price}
-                </button>
+        {/* Signature: tier swatch strip */}
+        <section className="border-y border-line/70 bg-stoneDeep/60">
+          <div className="mx-auto max-w-5xl px-6 py-14">
+            <p className="text-sm uppercase tracking-[0.15em] text-ink/50 mb-2">Design tiers</p>
+            <h2 className="font-display text-2xl italic text-inkDeep mb-8 max-w-md">
+              Every set tailored to your style and preferences — how far you take the design
+              sets the tier.
+            </h2>
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              {TIERS.map((tier) => (
+                <SwatchTier key={tier.id} tier={tier} href={`/tiers/${tier.id}`} />
               ))}
             </div>
-            {removalId !== "" && removalChosen && (
-              <p className="mt-3 text-base font-bold text-red-600">
-                Please ensure that your current set is done by me before selecting a removal option. I DO NOT DO FOREIGN REMOVALS!
-              </p>
-            )}
           </div>
+        </section>
 
+        {/* Policy strip */}
+        <section className="mx-auto max-w-5xl px-6 py-8 grid gap-10 sm:grid-cols-4">
           <div>
-            <h2 className="font-display text-xl italic text-inkDeep mb-4">4. Open slots</h2>
-            {eligibleSlots?.length === 0 ? (
-              <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-6 text-center">
-                {waitlistStatus === "done" ? (
-                  <div className="py-4">
-                    <h3 className="font-display text-lg text-inkDeep mb-2">You're on the list! ✿</h3>
-                    <p className="text-sm text-ink/70">You've successfully joined the waitlist! If there are any spots that open up, I will contact you! Thank you so much for your support!!</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 max-w-md mx-auto">
-                    <p className="font-display text-base text-inkDeep mb-1">
-                      Currently fully booked! Follow @nailsbynatwu on Instagram for availability updates! In the meantime, feel free to join the waitlist!
-                    </p>
-                    {waitlistError && (
-                      <p className="text-sm text-red-600 font-medium">{waitlistError}</p>
-                    )}
-                    <button type="button" onClick={handleWaitlistSubmit} className="w-full rounded-full bg-inkDeep py-2.5 text-mist">
-                      {waitlistStatus === "submitting" ? "Joining..." : "Join Priority Waitlist"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="rounded-2xl ring-1 ring-line p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setViewMonth((v) => v.month === 0 ? { year: v.year - 1, month: 11 } : { year: v.year, month: v.month - 1 })}
-                    className="p-2 rounded-full hover:bg-mist"
-                    aria-label="Previous month"
-                  >
-                    ←
-                  </button>
-                  <p className="font-display text-lg text-inkDeep">{monthLabel}</p>
-                  <button
-                    type="button"
-                    onClick={() => setViewMonth((v) => v.month === 11 ? { year: v.year + 1, month: 0 } : { year: v.year, month: v.month + 1 })}
-                    className="p-2 rounded-full hover:bg-mist"
-                    aria-label="Next month"
-                  >
-                    →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 mb-1 text-center text-xs uppercase tracking-wide text-ink/40">
-                  {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                    <div key={i}>{d}</div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-7 gap-1">
-                  {calendarDays.map((day, i) => {
-                    if (day === null) return <div key={i} />;
-                    const key = dateKey(viewMonth.year, viewMonth.month, day);
-                    const hasSlots = datesWithSlots.has(key);
-                    const isSelected = selectedDate === key;
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        disabled={!hasSlots}
-                        onClick={() => { setSelectedDate(key); setSlotId(""); }}
-                        className={`aspect-square rounded-lg text-sm flex items-center justify-center transition ${isSelected
-                          ? "bg-inkDeep text-mist"
-                          : hasSlots
-                            ? "bg-mist text-inkDeep hover:ring-1 hover:ring-inkDeep"
-                            : "text-ink/25 cursor-not-allowed"
-                          }`}
-                      >
-                        {day}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedDate && (
-                  <div className="mt-5 pt-5 border-t border-line/70">
-                    <p className="text-sm text-ink/60 mb-3">Available times</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {slotsForSelectedDate.map((s) => (
-                        <button
-                          type="button"
-                          key={s.id}
-                          onClick={() => setSlotId(s.id)}
-                          className={`rounded-xl px-4 py-3 ring-1 ${slotId === s.id ? "bg-inkDeep text-mist" : "ring-line"}`}
-                        >
-                          {formatTime(s.time)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <p className="font-display text-lg text-inkDeep mb-1">Appointment only</p>
+            <p className="text-base text-ink/70">All bookings go through the site!</p>
           </div>
-
-          <div className="rounded-2xl bg-stoneDeep/60 ring-1 ring-line p-5">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={policyAgreed}
-                onChange={(e) => setPolicyAgreed(e.target.checked)}
-                className="mt-1 h-5 w-5 accent-inkDeep flex-shrink-0"
-              />
-              <span className="text-base text-inkDeep">
-                I have read and understood the{" "}
-                <Link href="/policies" target="_blank" className="underline text-umber hover:text-inkDeep">
-                  studio policies
-                </Link>.
-              </span>
-            </label>
+          <div>
+            <p className="font-display text-lg text-inkDeep mb-1">Monthly slots</p>
+            <p className="text-base text-ink/70">
+              New availability is posted each month!
+              All updates are posted on instagram
+              @nailsbynatwu.
+            </p>
           </div>
-
-          {formError && (
-            <p className="text-sm text-red-600 font-medium text-center">{formError}</p>
-          )}
-          {formNotice && (
-            <p className="text-sm text-umber font-medium text-center">{formNotice}</p>
-          )}
-
-          <button type="submit" disabled={status === "submitting"} className="w-full rounded-full bg-inkDeep px-7 py-3 text-mist">
-            {status === "submitting" ? "Sending..." : "Book Now"}
-          </button>
-        </form>
+          <div>
+            <p className="font-display text-lg text-inkDeep mb-1">$5 deposit</p>
+            <p className="text-base text-ink/70">Required after confirming your booking.</p>
+          </div>
+          <div>
+            <p className="font-display text-lg text-inkDeep mb-1">Loyalty</p>
+            <p className="text-base text-ink/70">{LOYALTY_NOTE}</p>
+          </div>
+        </section>
       </main>
+
       <Footer />
     </>
   );
