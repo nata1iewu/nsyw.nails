@@ -62,6 +62,7 @@ export default function Services() {
             </div>
             <div className="flex items-center justify-between px-6 py-4">
               <span className="font-body text-ink">Builder gel (soft gel)</span>
+              <span className="font-display text-lg text-umber">$50</span>
               <div className="flex gap-8">
                 <span className="font-display text-lg text-umber w-16 text-right">${BUILDER_GEL.studentPrice}</span>
                 <span className="font-display text-lg text-ink/60 w-16 text-right">${BUILDER_GEL.regularPrice}</span>
